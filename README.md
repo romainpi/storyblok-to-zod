@@ -25,23 +25,23 @@ Running:
 
 ```sh
 # With pnpm
-pnpm storyblok-to-zod --space STORYBLOK_ID
+pnpm storyblok-to-zod --space STORYBLOK_SPACE_ID
 
 # With yarn
-yarn storyblok-to-zod --space STORYBLOK_ID
+yarn storyblok-to-zod --space STORYBLOK_SPACE_ID
 ```
 
 ### Without installation
 
 ```sh
 # With npm
-npx storyblok-to-zod --space STORYBLOK_ID
+npx storyblok-to-zod --space STORYBLOK_SPACE_ID
 
 # With pnpm
-pnpm dlx storyblok-to-zod --space STORYBLOK_ID
+pnpm dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
 
 # With yarn
-yarn dlx storyblok-to-zod --space STORYBLOK_ID
+yarn dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
 ```
 
 ## Options
