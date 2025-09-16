@@ -2,6 +2,8 @@
 
 Generate a Zod schema from your Storyblok components. _Datasources soon_.
 
+Useful for defining Zod schemas for [Astro's Content Collections][astro-collections].
+
 ## Usage
 
 ### With installation
@@ -49,10 +51,6 @@ yarn dlx storyblok-to-zod --space STORYBLOK_ID
 | --space   | -s    | (Required) The ID of your Storyblok space | -       |
 | --verbose | -v    | Verbose mode                              | false   |
 | --help    | -h    | Show command help                         | false   |
-
-## Why does this exist?
-
-- I required a tool like this for [Astro's Content Collections][astro-collections] and didn't find any simple guide or let alone a tool to help me solve this problem.
 
 ## Notes
 
