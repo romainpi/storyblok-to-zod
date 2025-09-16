@@ -42,12 +42,12 @@ const schemaRegistry = new Map<string, string>();
 
 // Load the storyblok.d.ts file using ts-morph to analyze imports
 const storyblokTypesDefinitionFile = new Project().addSourceFileAtPath(
-  path.join(process.cwd(), CONSTANTS.TYPES_PATH, "storyblok.d.ts")
+  path.join(process.cwd(), CONSTANTS.TYPES_PATH, CONSTANTS.SB_INTERFACES_FILE)
 );
 
 // Extract the definition of interface StoryblokAsset from src/types/storyblok.d.ts
 const storyblokTypesFileContent = await fs.readFile(
-  path.join(process.cwd(), CONSTANTS.TYPES_PATH, "storyblok.d.ts"),
+  path.join(process.cwd(), CONSTANTS.TYPES_PATH, CONSTANTS.SB_INTERFACES_FILE),
   "utf-8"
 );
 
