@@ -1,7 +1,7 @@
 {
   "name": "storyblok-to-zod",
   "type": "module",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Generates a Zod schema from your Storyblok components.",
   "main": "./dist/index.mjs",
   "files": [
@@ -32,7 +32,7 @@
   "license": "MIT",
   "packageManager": "pnpm@10.16.1",
   "devDependencies": {
-    "@types/node": "^24.5.0",
+    "@types/node": "^24.5.1",
     "typescript": "^5.9.2",
     "unbuild": "^3.6.1"
   },
