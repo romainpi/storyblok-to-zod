@@ -10,11 +10,6 @@ import extractSbInterfaceToZod from "./functions/extractSbInterfaceToZod";
 import * as CONSTANTS from "./constants";
 import { Command } from "commander";
 
-// Global version variable injected by the build process
-declare const __VERSION__: string;
-
-console.log(chalk.bold("storyblok-to-zod"), `v${__VERSION__}`);
-
 const program = new Command();
 program
   .name("storyblok-to-zod")
