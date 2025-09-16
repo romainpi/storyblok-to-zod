@@ -50,6 +50,7 @@ yarn dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
 | --------- | ----- | ----------------------------------------- | ------- |
 | --space   | -s    | (Required) The ID of your Storyblok space | -       |
 | --verbose | -v    | Verbose mode                              | false   |
+| --debug   | -d    | Show debug information                    | false   |
 | --help    | -h    | Show command help                         | false   |
 
 ## Notes
