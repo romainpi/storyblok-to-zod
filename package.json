@@ -1,17 +1,14 @@
 {
   "name": "storyblok-to-zod",
   "type": "module",
-  "version": "0.0.1",
-  "description": "Generate a Zod schema from your components from a Storyblok space",
+  "version": "0.0.4",
+  "description": "Generate a Zod schema from your Storyblok components.",
   "main": "./dist/index.mjs",
   "files": [
     "dist/**"
   ],
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    }
+  "bin": {
+    "storyblok-to-zod": "./dist/index.mjs"
   },
   "types": "./dist/index.d.ts",
   "scripts": {
@@ -27,7 +24,7 @@
     "javascript"
   ],
   "author": "Romain Pironneau",
-  "license": "ISC",
+  "license": "MIT",
   "packageManager": "pnpm@10.16.1",
   "devDependencies": {
     "@types/node": "^24.5.0",
@@ -35,6 +32,9 @@
     "unbuild": "^3.6.1"
   },
   "dependencies": {
-    "chalk": "^5.6.2"
+    "@storyblok/management-api-client": "^0.1.3",
+    "chalk": "^5.6.2",
+    "ts-morph": "^27.0.0",
+    "ts-to-zod": "^4.0.0"
   }
 }

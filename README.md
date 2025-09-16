@@ -1,6 +1,6 @@
 # storyblok-to-zod
 
-Generates Zod schemas for your StoryBlok components (_and datasources?_), using Storyblok's API.
+Generate a Zod schema from your Storyblok components. _Datasources soon_.
 
 ## Installation
 
@@ -9,16 +9,19 @@ TODO
 ## Usage
 
 ```shell
-pnpm storyblok-to-zod
+npx storyblok-to-zod --space STORYBLOK_ID
 ```
 
-__TODO__
+## Options
+
+| Option    | Description                               | Default |
+| --------- | ----------------------------------------- | ------- |
+| --space   | (Required) The ID of your Storyblok space | -       |
+| --verbose | Verbose mode                              | false   |
 
 ## Why does this exist?
 
 - I required a tool like this for [Astro's Content Collections][astro-collections] and didn't find any simple guide or let alone a tool to help me solve this problem.
-- This helps with your
-- I wanted to try publishing and maitaning a public npm package and this seemed like a bonafide opportunity.
 
 ## Notes
 
@@ -38,7 +41,27 @@ The implementation [can be found here][abandoned-implementation] in the archived
 - [ ] Add Storyblok datasources as well.
 - [ ] Revive old code.
 
+## License
+
+Copyright &copy; 2025 Romain Pironneau
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 [astro-collections]: https://docs.astro.build/en/guides/content-collections/
 [astro-alpha]: https://www.storyblok.com/mp/announcing-storyblok-loader-astro-content-layer-api
-[contentlayer-search]: https://github.com/search?q=org%3Astoryblok+contentLayer&type=code
 [abandoned-implementation]: https://github.com/storyblok/storyblok-astro/commit/1a9bfb16e5886b3419607eb77802088f5eb9dfc4
