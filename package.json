@@ -1,12 +1,17 @@
 {
   "name": "storyblok-to-zod",
   "type": "module",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Generate a Zod schema from your Storyblok components.",
   "main": "./dist/index.mjs",
   "files": [
     "dist/**"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/romainpi/storyblok-to-zod.git",
+    "branch": "main"
+  },
   "bin": {
     "storyblok-to-zod": "./dist/index.mjs"
   },
