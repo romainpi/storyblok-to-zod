@@ -59,7 +59,7 @@ yarn dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
 
 ## Notes
 
-Currently using [`ts-to-zod`] version `^3.1.5` because Astro hasn't updated to Zod v4 yet.
+Currently using [`ts-to-zod`] version `^3.15.0` because Astro hasn't updated to Zod v4 yet.
 
 ## TODO
 
