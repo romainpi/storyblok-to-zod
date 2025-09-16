@@ -178,8 +178,15 @@ function convertSbToZodType(value: Components.ComponentSchemaField, parentCompon
     if (value.component_whitelist && value.component_whitelist.length > 0) {
       if (value.component_whitelist.length == 1) {
         // If only one component is whitelisted, use that schema directly
-        const singleComponent = value.component_whitelist[0];
-        return kebabToCamelCase(singleComponent) + "Schema";
+        if (!value.component_whitelist[0]) {
+          Tracer.log(
+            LogLevel.WARN,
+            `Bloks field in component '${parentComponentName}' has an empty component_whitelist. Defaulting to 'z.any()'.`
+          );
+          return "z.any()";
+        }
+
+        return kebabToCamelCase(value.component_whitelist[0]) + "Schema";
       }
       const whitelistedComponents = value.component_whitelist
         .map((comp) => kebabToCamelCase(comp) + "Schema")
