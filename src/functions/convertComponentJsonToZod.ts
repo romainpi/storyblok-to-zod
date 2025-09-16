@@ -47,13 +47,22 @@ export default async function convertComponentJsonToZod(
 
   // Parse the JSON content
   const jsonData = JSON.parse(fileContent);
-  const schemaData = jsonData.schema as Components.ComponentSchemaField[] | undefined;
+  const schemaData = jsonData.schema as Record<string, Components.ComponentSchemaField> | undefined;
 
   if (!jsonData || !schemaData) {
     throw new Error(`Invalid or missing schema in JSON for component '${componentName}'.`);
   }
 
   for (const propName of Object.keys(schemaData)) {
+    if (schemaData[propName] === undefined) {
+      Tracer.log(
+        LogLevel.WARN,
+        `Field '${propName}' in component '${componentName}' is undefined. Defaulting to 'z.any()'.`
+      );
+      outputContent += `  ${propName}: z.any(),\n`;
+      continue;
+    }
+
     const value: Components.ComponentSchemaField = schemaData[propName];
 
     Tracer.log(LogLevel.DEBUG, `propName: '${propName}', value.type: '${value.type}'`, "convertComponentJsonToZod");
