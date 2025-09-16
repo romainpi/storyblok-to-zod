@@ -54,22 +54,11 @@ yarn dlx storyblok-to-zod --space STORYBLOK_ID
 
 ## Notes
 
-Takes inspirations from:
+Currently using [`ts-to-zod`] version `^3.1.5` because Astro hasn't updated to Zod v4 yet.
 
-- [`storyblok types generate`](https://github.com/storyblok/monoblok/tree/main/packages/cli/src/commands/types/generate)
-- [`storyblok components pull`](https://github.com/storyblok/monoblok/tree/main/packages/cli/src/commands/components/pull)
-
-### Storyblok were working on an official Astro Content Layer API implementation
-
-September of 2024 there was a post [about an alpha version of a "Storyblok Loader for the Astro Content Layer API"][astro-alpha].
-
-The implementation [can be found here][abandoned-implementation] in the archived repo (the code has since been moved to a monorepo and this development branch has not been carried over). It appears this implementation did not take care of defining a Zod schema for Storyblok's modules.
-
-## TODO (maybe)
+## TODO
 
 - [ ] Add Storyblok datasources as well.
-- [ ] Revive old code.
 
 [astro-collections]: https://docs.astro.build/en/guides/content-collections/
-[astro-alpha]: https://www.storyblok.com/mp/announcing-storyblok-loader-astro-content-layer-api
-[abandoned-implementation]: https://github.com/storyblok/storyblok-astro/commit/1a9bfb16e5886b3419607eb77802088f5eb9dfc4
+[`ts-to-zod`]:https://www.npmjs.com/package/ts-to-zod
