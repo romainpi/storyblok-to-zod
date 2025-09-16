@@ -15,6 +15,8 @@ program
   .name("storyblok-to-zod")
   .description("Generates a Zod schema from your Storyblok components")
   .requiredOption("-s, --space <storyblokSpaceId>", "Storyblok space ID")
+  .option("-f, --folder <folderPath>", "Path to the folder containing Storyblok components", ".storyblok")
+  .option("-o, --output <filePath>", "Output file for result Zod file", "src/types/storyblok.zod.ts")
   .option("-v, --verbose", "show verbose information")
   .option("-d, --debug", "show debug information");
 
@@ -29,22 +31,32 @@ if (logLevel >= LogLevel.VERBOSE) {
   Tracer.log(LogLevel.VERBOSE, `Log level set to ${LogLevel[logLevel]}`);
 }
 
-const jsonPath = `.storyblok/components/${options.space}/`;
+// check if folder is a relative or absolute path
+const folderPath = path.resolve(options.folder);
+const jsonPath = `${folderPath}/components/${options.space}/`;
 if (!options.space) throw new Error("Missing Storyblok space ID");
 
 /** A registry to store converted Zod schemas for Storyblok native types */
 const schemaRegistry = new Map<string, string>();
 
+const pathToSbInterfaceFile = path.join(folderPath, "types", CONSTANTS.SB_INTERFACES_FILE);
+Tracer.log(LogLevel.DEBUG, `pathToSbInterfaceFile: '${pathToSbInterfaceFile}'`);
+
+// Check file exists
+try {
+  await fs.access(pathToSbInterfaceFile);
+
+  Tracer.log(LogLevel.DEBUG, `The specified file '${pathToSbInterfaceFile}' exists and is accessible.`);
+} catch (err) {
+  Tracer.log(LogLevel.ERROR, `The specified file "${pathToSbInterfaceFile}" does not exist or is not accessible.`);
+  process.exit(1);
+}
+
 // Load the storyblok.d.ts file using ts-morph to analyze imports
-const storyblokTypesDefinitionFile = new Project().addSourceFileAtPath(
-  path.join(process.cwd(), CONSTANTS.TYPES_PATH, CONSTANTS.SB_INTERFACES_FILE)
-);
+const storyblokTypesDefinitionFile = new Project().addSourceFileAtPath(pathToSbInterfaceFile);
 
 // Extract the definition of interface StoryblokAsset from src/types/storyblok.d.ts
-const storyblokTypesFileContent = await fs.readFile(
-  path.join(process.cwd(), CONSTANTS.TYPES_PATH, CONSTANTS.SB_INTERFACES_FILE),
-  "utf-8"
-);
+const storyblokTypesFileContent = await fs.readFile(pathToSbInterfaceFile, "utf-8");
 
 for (const currentInterface of storyblokTypesDefinitionFile.getInterfaces()) {
   const type = currentInterface.getName();
@@ -56,26 +68,33 @@ for (const currentInterface of storyblokTypesDefinitionFile.getInterfaces()) {
 Tracer.log(LogLevel.DEBUG);
 
 // List all components in the JSON_PATH directory
-const allFiles = await fs.readdir(path.join(process.cwd(), jsonPath));
+const allFiles = await fs.readdir(jsonPath);
 
 const ignoredFiles = ["groups.json", "tags.json"];
 const componentFiles = allFiles.filter((file) => file.endsWith(".json") && !ignoredFiles.includes(file));
+
+Tracer.log(LogLevel.VERBOSE, `Found ${componentFiles.length} component JSON files in folder '${jsonPath}'.`);
 
 // Scan all components and create a dependency graph to determine conversion order:
 const componentDependencies = new Map<string, string[]>();
 for (const fileName of componentFiles) {
   const componentName = path.basename(fileName, ".json");
-  const fileContent = await fs.readFile(path.join(process.cwd(), jsonPath, fileName), "utf-8");
-  const jsonSchema = JSON.parse(fileContent);
-  const schemaData = jsonSchema.schema as Components.ComponentSchemaField[] | undefined;
+  const fileContent = await fs.readFile(path.join(jsonPath, fileName), "utf-8");
+  const jsonData = JSON.parse(fileContent);
 
-  if (!jsonSchema || !schemaData) {
+  const schemaData = jsonData.schema as Record<string, Components.ComponentSchemaField> | undefined;
+
+  if (!jsonData || !schemaData) {
     Tracer.log(LogLevel.WARN, `Invalid or missing schema in JSON for component '${componentName}'. Skipping.`);
     continue;
   }
 
   const dependencies: string[] = [];
-  for (const field of schemaData) {
+  for (const fieldName of Object.keys(schemaData)) {
+    const field = schemaData[fieldName];
+
+    if (!field) continue;
+
     if (field.type === "bloks" && Array.isArray(field.component_whitelist)) {
       dependencies.push(...field.component_whitelist);
     }
@@ -112,12 +131,12 @@ for (const component of componentDependencies.keys()) {
 
 // Start conversion process
 for (const componentName of sortedComponents) {
-  await convertComponentJsonToZod(componentName, path.join(process.cwd(), jsonPath));
+  await convertComponentJsonToZod(componentName, jsonPath);
 }
 
 const allNativeSchemas = Array.from(schemaRegistry.values()).join("\n");
 const allComponentSchemas = Array.from(ConvertedComponents.getAll())
-  .map(([schema]) => schema)
+  .map((result) => result[1])
   .join("\n");
 
 const finalContent = `\
@@ -125,7 +144,10 @@ ${CONSTANTS.FILE_HEADER}
 ${allNativeSchemas}
 ${allComponentSchemas}`;
 
-const outputFilePath = path.join(process.cwd(), CONSTANTS.TYPES_PATH, "storyblok.zod.ts");
+const outputDir = path.dirname(options.output);
+await fs.mkdir(outputDir, { recursive: true });
+
+const outputFilePath = path.join(options.output);
 await fs.writeFile(outputFilePath, finalContent, "utf-8");
 
-console.log(chalk.green("Zod schemas generated successfully at"), chalk.underline(outputFilePath));
+console.log(chalk.green("Zod definitions generated successfully at"), chalk.underline(outputFilePath));

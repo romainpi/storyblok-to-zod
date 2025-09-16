@@ -2,6 +2,8 @@
 
 Generates a Zod schema from your Storyblok components.
 
+Processes the output of Storyblok's CLI `components pull` and `types generate` commands.
+
 Useful for defining Zod schemas for [Astro's Content Collections][astro-collections].
 
 ## Usage
@@ -46,12 +48,14 @@ yarn dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
 
 ## Options
 
-| Option    | Short | Description                               | Default |
-| --------- | ----- | ----------------------------------------- | ------- |
-| --space   | -s    | (Required) The ID of your Storyblok space | -       |
-| --verbose | -v    | Verbose mode                              | false   |
-| --debug   | -d    | Show debug information                    | false   |
-| --help    | -h    | Show command help                         | false   |
+| Option    | Short | Description                                            | Default                      |
+| --------- | ----- | ------------------------------------------------------ | ---------------------------- |
+| --space   | -s    | (Required) The ID of your Storyblok space              | -                            |
+| --folder  | -f    | Path to the folder containing the Storyblok components | '.storyblok'                 |
+| --output  | -o    | Output file for result Zod file                        | 'src/types/storyblok.zod.ts' |
+| --verbose | -v    | Verbose mode                                           | false                        |
+| --debug   | -d    | Show debug information                                 | false                        |
+| --help    | -h    | Show command help                                      | false                        |
 
 ## Notes
 
