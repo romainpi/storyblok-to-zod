@@ -80,10 +80,9 @@ for (const fileName of componentFiles) {
   }
 
   const dependencies: string[] = [];
-  for (const propName of Object.keys(schemaData)) {
-    const value = schemaData[propName];
-    if (value.type === "bloks" && Array.isArray(value.component_whitelist)) {
-      dependencies.push(...value.component_whitelist);
+  for (const field of schemaData) {
+    if (field.type === "bloks" && Array.isArray(field.component_whitelist)) {
+      dependencies.push(...field.component_whitelist);
     }
   }
 
@@ -123,7 +122,7 @@ for (const componentName of sortedComponents) {
 
 const allNativeSchemas = Array.from(schemaRegistry.values()).join("\n");
 const allComponentSchemas = Array.from(ConvertedComponents.getAll())
-  .map(([name, schema]) => schema)
+  .map(([schema]) => schema)
   .join("\n");
 
 const finalContent = `\
