@@ -60,10 +60,7 @@ const allFiles = await fs.readdir(path.join(process.cwd(), JSON_PATH));
 const ignoredFiles = ["groups.json", "tags.json"];
 const componentFiles = allFiles.filter((file) => file.endsWith(".json") && !ignoredFiles.includes(file));
 
-// console.log(`Found ${componentFiles.length} component JSON files in '${JSON_PATH}':`, componentFiles);
-
 // Scan all components and create a dependency graph to determine conversion order:
-
 const componentDependencies = new Map<string, string[]>();
 for (const fileName of componentFiles) {
   const componentName = path.basename(fileName, ".json");
@@ -113,31 +110,10 @@ for (const component of componentDependencies.keys()) {
   visit(component, new Set<string>());
 }
 
-// console.log('Component conversion order determined by dependencies:', sortedComponents);
-
 // Start conversion process
-
 for (const componentName of sortedComponents) {
   await convertComponentJsonToZod(componentName);
 }
-
-/*
-// Convert the components
-const blogPostZod = await convertComponentJsonToZod('blog-post');
-
-const callToActionZod = await convertComponentJsonToZod('call-to-action'); // Required by announcement
-const announcementZod = await convertComponentJsonToZod('announcement');
-
-const pageZod = await convertComponentJsonToZod('page');
-
-// const finalContent = `\
-// ${FILE_HEADER}
-// ${storyblokRichtextSchema}
-// ${storyblokAssetSchema}
-// ${announcementZod}
-// ${blogPostZod}
-// ${pageZod}`;
-*/
 
 const allNativeSchemas = Array.from(schemaRegistry.values()).join("\n");
 const allComponentSchemas = Array.from(convertedComponents.values()).join("\n");
@@ -146,8 +122,6 @@ const finalContent = `\
 ${FILE_HEADER}
 ${allNativeSchemas}
 ${allComponentSchemas}`;
-
-// console.log(`Final Zod schema content:\n${finalContent}`);
 
 const outputFilePath = path.join(process.cwd(), TYPES_PATH, "storyblok.zod.ts");
 await fs.writeFile(outputFilePath, finalContent, "utf-8");
