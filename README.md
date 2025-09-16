@@ -2,14 +2,44 @@
 
 Generate a Zod schema from your Storyblok components. _Datasources soon_.
 
-## Installation
-
-TODO
-
 ## Usage
 
-```shell
+### With installation
+
+Installation:
+
+```sh
+# With npm
+npm install storyblok-to-zod --save-dev
+
+# With pnpm
+pnpm add storyblok-to-zod --dev
+
+# With yarn
+yarn add storyblok-to-zod --dev
+```
+
+Running:
+
+```sh
+# With pnpm
+pnpm storyblok-to-zod --space STORYBLOK_ID
+
+# With yarn
+yarn storyblok-to-zod --space STORYBLOK_ID
+```
+
+### Without installation
+
+```sh
+# With npm
 npx storyblok-to-zod --space STORYBLOK_ID
+
+# With pnpm
+pnpm dlx storyblok-to-zod --space STORYBLOK_ID
+
+# With yarn
+yarn dlx storyblok-to-zod --space STORYBLOK_ID
 ```
 
 ## Options
