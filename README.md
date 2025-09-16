@@ -14,10 +14,11 @@ npx storyblok-to-zod --space STORYBLOK_ID
 
 ## Options
 
-| Option    | Description                               | Default |
-| --------- | ----------------------------------------- | ------- |
-| --space   | (Required) The ID of your Storyblok space | -       |
-| --verbose | Verbose mode                              | false   |
+| Option    | Short | Description                               | Default |
+| --------- | ----- | ----------------------------------------- | ------- |
+| --space   | -s    | (Required) The ID of your Storyblok space | -       |
+| --verbose | -v    | Verbose mode                              | false   |
+| --help    | -h    | Show command help                         | false   |
 
 ## Why does this exist?
 

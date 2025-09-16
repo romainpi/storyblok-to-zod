@@ -1,29 +1,24 @@
 import chalk from "chalk";
-
-// Global version variable injected by the build process
-declare const __VERSION__: string;
-
 import type { Components } from "@storyblok/management-api-client";
 import fs from "fs/promises";
 import path from "path";
 import { Project } from "ts-morph";
 import { generate } from "ts-to-zod";
+import parseCliOptions from "./parseCliOptions";
 
-console.log(chalk.green(`storyblok-to-zod (v${__VERSION__})`));
-console.log(chalk.bold("storyblok-to-zod"), "script started...");
+// Global version variable injected by the build process
+declare const __VERSION__: string;
+
+console.log(chalk.bold("storyblok-to-zod"), `v${__VERSION__}`);
+
+const options = parseCliOptions();
 
 const cliConfig = {
   /** Show verbose information*/
-  verbose: false,
+  verbose: options.verbose || false,
   /** Storyblok space ID*/
-  storyblokSpaceId: undefined as string | undefined,
+  storyblokSpaceId: options.space || undefined,
 };
-
-// Parse --verbose command line arguments
-const args = process.argv.slice(2);
-if (args.includes("--verbose")) {
-  cliConfig.verbose = true;
-}
 
 const VERBOSE = cliConfig.verbose;
 if (VERBOSE) {
@@ -31,19 +26,7 @@ if (VERBOSE) {
   console.log();
 }
 
-// Parse --space command line arguments
-const spaceArgIndex = args.findIndex((arg) => arg === "--space");
-if (spaceArgIndex !== -1 && args.length > spaceArgIndex + 1) {
-  const spaceId = args[spaceArgIndex + 1];
-  cliConfig.storyblokSpaceId = spaceId;
-
-  if (cliConfig.verbose) {
-    console.log(chalk.blue(`Using Storyblok Space ID: ${spaceId}`));
-  }
-}
-
 const TYPES_PATH = "src/types/";
-const STORYBLOK_NATIVE_TYPES = ["multilink", "asset", /*'multiasset', */ "richtext", "table"];
 
 const JSON_PATH = `.storyblok/components/${cliConfig.storyblokSpaceId}/`;
 if (!cliConfig.storyblokSpaceId) throw new Error("Missing Storyblok space ID");
