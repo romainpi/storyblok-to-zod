@@ -126,6 +126,8 @@ ${allComponentSchemas}`;
 const outputFilePath = path.join(process.cwd(), TYPES_PATH, "storyblok.zod.ts");
 await fs.writeFile(outputFilePath, finalContent, "utf-8");
 
+console.log(chalk.green("Zod schemas generated successfully at"), chalk.underline(outputFilePath));
+
 /**
  * Converts a Storyblok component schema JSON file to a Zod schema definition.
  *
