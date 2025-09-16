@@ -1,6 +1,6 @@
 # storyblok-to-zod
 
-Generate a Zod schema from your Storyblok components. _Datasources soon_.
+Generates a Zod schema from your Storyblok components.
 
 Useful for defining Zod schemas for [Astro's Content Collections][astro-collections].
 
