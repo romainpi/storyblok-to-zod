@@ -12,6 +12,16 @@ export class ValidationError extends Error {
 }
 
 /**
+ * Custom error class for file operation errors
+ */
+export class FileOperationError extends Error {
+  constructor(message: string, public readonly filePath: string, public readonly operation: string) {
+    super(message);
+    this.name = "FileOperationError";
+  }
+}
+
+/**
  * Type guard to check if a value is a non-empty string
  */
 export function isNonEmptyString(value: unknown): value is string {

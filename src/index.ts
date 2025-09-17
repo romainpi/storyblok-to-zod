@@ -9,6 +9,7 @@ import { ConvertedComponents } from "./statics/ConvertedComponents";
 import extractSbInterfaceToZod from "./functions/extractSbInterfaceToZod";
 import * as CONSTANTS from "./constants";
 import { Command } from "commander";
+import { safeWriteFile } from "./utils";
 import { validateCLIOptions, validatePaths } from "./validation";
 
 const program = new Command();
@@ -152,14 +153,7 @@ async function generateFinalOutput(schemaRegistry: Map<string, string>, outputPa
 
     const finalContent = `${CONSTANTS.FILE_HEADER}\n${allNativeSchemas}\n${allComponentSchemas}`;
 
-    const resolvedPath = path.resolve(outputPath);
-    const directory = path.dirname(resolvedPath);
-
-    // Ensure directory exists
-    await fs.mkdir(directory, { recursive: true });
-
-    // Write file
-    await fs.writeFile(resolvedPath, finalContent, "utf-8");
+    await safeWriteFile(outputPath, finalContent);
 
     Tracer.log(LogLevel.DEBUG, `Final output written to: ${path.resolve(outputPath)}`);
   } catch (error) {
