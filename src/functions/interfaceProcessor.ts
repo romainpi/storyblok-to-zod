@@ -33,16 +33,16 @@ export async function processStoryblokInterfaces(pathToSbInterfaceFile: string):
     }
 
     for (const currentInterface of interfaces) {
-      const typeName = currentInterface.getName();
+      const interfaceName = currentInterface.getName();
 
       try {
-        const schema = extractSbInterfaceToZod(typeName, storyblokTypesFileContent);
-        schemaRegistry.set(typeName, schema);
-        Tracer.log(LogLevel.DEBUG, `Processed interface: ${typeName}`);
+        const schema = extractSbInterfaceToZod(currentInterface, storyblokTypesFileContent);
+        schemaRegistry.set(interfaceName, schema);
+        Tracer.log(LogLevel.DEBUG, `Processed interface: ${interfaceName}`);
       } catch (error) {
         Tracer.log(
           LogLevel.WARN,
-          `Failed to process interface '${typeName}': ${error instanceof Error ? error.message : "Unknown error"}`
+          `Failed to process interface '${interfaceName}': ${error instanceof Error ? error.message : "Unknown error"}`
         );
       }
     }

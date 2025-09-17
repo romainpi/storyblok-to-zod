@@ -1,6 +1,7 @@
 import { generate } from "ts-to-zod";
 import { LogLevel, Tracer } from "../statics/Tracer";
 import { ValidationError, isNonEmptyString } from "../validation";
+import { InterfaceDeclaration } from "ts-morph";
 
 /**
  * Extracts a TypeScript interface from Storyblok's types definitions and returns it to a Zod schema.
@@ -17,7 +18,11 @@ import { ValidationError, isNonEmptyString } from "../validation";
  * // Returns: "export const StoryblokAssetSchema = z.object({ ... });"
  * ```
  */
-export default function extractSbInterfaceToZod(typeName: string, sbTypesFileContent: string): string {
+export default function extractSbInterfaceToZod(
+  interfaceDeclaration: InterfaceDeclaration,
+  sbTypesFileContent: string
+): string {
+  const typeName = interfaceDeclaration.getName();
   Tracer.log(LogLevel.DEBUG, `Enter with typeName='${typeName}'`, "extractSbInterfaceToZod");
 
   try {
