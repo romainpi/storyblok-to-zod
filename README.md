@@ -51,8 +51,8 @@ yarn dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
 | Option    | Short | Description                                            | Default                      |
 | --------- | ----- | ------------------------------------------------------ | ---------------------------- |
 | --space   | -s    | (Required) The ID of your Storyblok space              | -                            |
+| --output  | -o    | Output to file                                         | -                            |
 | --folder  | -f    | Path to the folder containing the Storyblok components | '.storyblok'                 |
-| --output  | -o    | Output file for result Zod file                        | 'src/types/storyblok.zod.ts' |
 | --verbose | -v    | Verbose mode                                           | false                        |
 | --debug   | -d    | Show debug information                                 | false                        |
 | --help    | -h    | Show command help                                      | false                        |

@@ -49,7 +49,7 @@ export async function isValidDirectoryPath(dirPath: string): Promise<boolean> {
 export interface CLIOptions {
   space: string;
   folder: string;
-  output: string;
+  output?: string;
   verbose?: boolean;
   debug?: boolean;
 }
@@ -63,10 +63,6 @@ export function validateCLIOptions(options: any): CLIOptions {
 
   if (!isNonEmptyString(options.folder)) {
     errors.push("Folder path is required and must be a non-empty string");
-  }
-
-  if (!isNonEmptyString(options.output)) {
-    errors.push("Output path is required and must be a non-empty string");
   }
 
   if (errors.length > 0) {
@@ -166,14 +162,16 @@ export async function validatePaths(options: CLIOptions): Promise<void> {
     }
   }
 
-  // Validate output directory can be created
-  const outputDir = path.dirname(path.resolve(options.output));
-  try {
-    await fs.mkdir(outputDir, { recursive: true });
-  } catch (error) {
-    errors.push(
-      `Cannot create output directory: ${outputDir} - ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+  if (options.output && !isNonEmptyString(options.output)) {
+    // Validate output directory can be created
+    const outputDir = path.dirname(path.resolve(options.output));
+    try {
+      await fs.mkdir(outputDir, { recursive: true });
+    } catch (error) {
+      errors.push(
+        `Cannot create output directory: ${outputDir} - ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+    }
   }
 
   if (errors.length > 0) {

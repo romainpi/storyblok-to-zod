@@ -3,11 +3,12 @@ import { LogLevel, Tracer } from "../statics/Tracer";
 import { ConvertedComponents } from "../statics/ConvertedComponents";
 import { safeWriteFile } from "../utils";
 import * as CONSTANTS from "../constants";
+import chalk from "chalk";
 
 /**
  * Generate the final output file
  */
-export async function generateFinalOutput(schemaRegistry: Map<string, string>, outputPath: string): Promise<void> {
+export async function generateFinalOutput(schemaRegistry: Map<string, string>, outputPath?: string): Promise<void> {
   try {
     const allNativeSchemas = Array.from(schemaRegistry.values()).join("\n");
     const allComponentSchemas = Array.from(ConvertedComponents.getAll())
@@ -16,9 +17,18 @@ export async function generateFinalOutput(schemaRegistry: Map<string, string>, o
 
     const finalContent = `${CONSTANTS.FILE_HEADER}\n${allNativeSchemas}\n${allComponentSchemas}`;
 
-    await safeWriteFile(outputPath, finalContent);
+    if (outputPath) {
+      await safeWriteFile(outputPath, finalContent);
+      Tracer.log(LogLevel.DEBUG, `Final output written to: ${path.resolve(outputPath)}`);
 
-    Tracer.log(LogLevel.DEBUG, `Final output written to: ${path.resolve(outputPath)}`);
+      Tracer.log(
+        LogLevel.INFO,
+        chalk.green("Zod definitions generated successfully at ") + chalk.underline(path.resolve(outputPath))
+      );
+    } else {
+      console.log();
+      console.log(finalContent);
+    }
   } catch (error) {
     throw new Error(`Failed to generate final output: ${error instanceof Error ? error.message : "Unknown error"}`);
   }

@@ -1,12 +1,8 @@
-import chalk from "chalk";
 import path from "path";
 import { LogLevel, Tracer } from "./statics/Tracer";
 import * as CONSTANTS from "./constants";
 import { Command } from "commander";
-import {
-  validateCLIOptions,
-  validatePaths,
-} from "./validation";
+import { validateCLIOptions, validatePaths } from "./validation";
 import { processStoryblokInterfaces } from "./functions/interfaceProcessor";
 import { discoverComponentFiles, buildDependencyGraph, convertComponents } from "./functions/componentProcessor";
 import { generateFinalOutput } from "./functions/outputGenerator";
@@ -17,8 +13,8 @@ program
   .name("storyblok-to-zod")
   .description("Generates a Zod schema from your Storyblok components")
   .requiredOption("-s, --space <storyblokSpaceId>", "Storyblok space ID")
+  .option("-o, --output <filePath>", "Output to file")
   .option("-f, --folder <folderPath>", "Path to the folder containing Storyblok components", ".storyblok")
-  .option("-o, --output <filePath>", "Output file for result Zod file", "src/types/storyblok.zod.ts")
   .option("-v, --verbose", "show verbose information")
   .option("-d, --debug", "show debug information");
 
@@ -76,11 +72,6 @@ async function main(): Promise<void> {
 
     // Generate final output
     await generateFinalOutput(schemaRegistry, options.output);
-
-    console.log(
-      chalk.green("Zod definitions generated successfully at"),
-      chalk.underline(path.resolve(options.output))
-    );
   } catch (error) {
     await handleError(error);
   }
