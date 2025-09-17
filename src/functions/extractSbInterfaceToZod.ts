@@ -18,16 +18,18 @@ import { InterfaceDeclaration } from "ts-morph";
  * // Returns: "export const StoryblokAssetSchema = z.object({ ... });"
  * ```
  */
-export default function extractSbInterfaceToZod(
-  interfaceDeclaration: InterfaceDeclaration,
-  sbTypesFileContent: string
-): string {
+export default function extractSbInterfaceToZod(interfaceDeclaration: InterfaceDeclaration): string {
   const interfaceName = interfaceDeclaration.getName();
   Tracer.log(LogLevel.DEBUG, `Enter with interfaceName='${interfaceName}'`, "extractSbInterfaceToZod");
 
-  const properties = interfaceDeclaration.getProperties();
+  const interfaceDefinition = interfaceDeclaration.getText();
+  const interfaceProperties = interfaceDeclaration.getProperties();
 
-  Tracer.log(LogLevel.DEBUG, `Found interface '${interfaceName}' with ${properties.length} properties`, "extractSbInterfaceToZod");
+  Tracer.log(
+    LogLevel.DEBUG,
+    `Found interface '${interfaceName}' with ${interfaceProperties.length} properties`,
+    "extractSbInterfaceToZod"
+  );
 
   try {
     // Validate inputs
@@ -35,38 +37,12 @@ export default function extractSbInterfaceToZod(
       throw new ValidationError("Interface's name must be a non-empty string", { typeName: interfaceName });
     }
 
-    if (!isNonEmptyString(sbTypesFileContent)) {
-      throw new ValidationError("Storyblok types file content must be a non-empty string", {
-        contentType: typeof sbTypesFileContent,
-        contentLength: (sbTypesFileContent as any)?.length || 0,
-      });
-    }
-
-    // Create regex to find the interface definition
-    const sbAssetInterfaceRegex = new RegExp(`interface ${interfaceName}( extends.*)* {[^}]+}`);
-
-    const sbAssetMatch = sbTypesFileContent.match(sbAssetInterfaceRegex);
-
-    if (!sbAssetMatch || !sbAssetMatch[0]) {
-      throw new ValidationError(`Could not find interface '${interfaceName}' in storyblok.d.ts file`, {
-        typeName: interfaceName,
-        fileContentLength: sbTypesFileContent.length,
-        availableInterfaces: extractAvailableInterfaces(sbTypesFileContent),
-      });
-    }
-
-    const sbAssetInterface = sbAssetMatch[0];
-
-    if (!sbAssetInterface.trim()) {
-      throw new ValidationError(`Found empty interface definition for '${interfaceName}'`, { typeName: interfaceName });
-    }
-
     // Convert interface to Zod schema using ts-to-zod
     let schemaGenerator;
     let zodSchema;
 
     try {
-      schemaGenerator = generate({ sourceText: sbAssetInterface });
+      schemaGenerator = generate({ sourceText: interfaceDefinition });
       zodSchema = schemaGenerator.getZodSchemasFile("~/types/storyblok.d");
     } catch (error) {
       throw new Error(
@@ -77,7 +53,9 @@ export default function extractSbInterfaceToZod(
     }
 
     if (!zodSchema || !zodSchema.trim()) {
-      throw new ValidationError(`Generated empty Zod schema for interface '${interfaceName}'`, { typeName: interfaceName });
+      throw new ValidationError(`Generated empty Zod schema for interface '${interfaceName}'`, {
+        typeName: interfaceName,
+      });
     }
 
     // Remove the first two lines (imports and empty line) and clean up
@@ -94,7 +72,11 @@ export default function extractSbInterfaceToZod(
     if (!cleanedSchema) {
       Tracer.log(LogLevel.WARN, `Interface '${interfaceName}' results in an empty Zod definition`);
     } else {
-      Tracer.log(LogLevel.DEBUG, `Successfully generated Zod schema for interface '${interfaceName}'`, "extractSbInterfaceToZod");
+      Tracer.log(
+        LogLevel.DEBUG,
+        `Successfully generated Zod schema for interface '${interfaceName}'`,
+        "extractSbInterfaceToZod"
+      );
     }
 
     return cleanedSchema;
@@ -105,31 +87,12 @@ export default function extractSbInterfaceToZod(
     }
 
     const wrappedError = new Error(
-      `Unexpected error extracting interface '${interfaceName}': ${error instanceof Error ? error.message : "Unknown error"}`
+      `Unexpected error extracting interface '${interfaceName}': ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
     );
 
     Tracer.log(LogLevel.ERROR, wrappedError.message);
     throw wrappedError;
-  }
-}
-
-/**
- * Helper function to extract available interfaces from the types file for better error reporting
- */
-function extractAvailableInterfaces(fileContent: string): string[] {
-  try {
-    const interfaceRegex = /interface\s+(\w+)/g;
-    const matches = [];
-    let match;
-
-    while ((match = interfaceRegex.exec(fileContent)) !== null) {
-      if (match[1]) {
-        matches.push(match[1]);
-      }
-    }
-
-    return matches;
-  } catch {
-    return [];
   }
 }

@@ -1,11 +1,7 @@
-import fs from "fs/promises";
 import { Project } from "ts-morph";
 import { LogLevel, Tracer } from "../statics/Tracer";
 import extractSbInterfaceToZod from "./extractSbInterfaceToZod";
-import {
-  FileOperationError,
-  ValidationError,
-} from "../validation";
+import { FileOperationError, ValidationError } from "../validation";
 
 /**
  * Process Storyblok interface definitions
@@ -15,13 +11,6 @@ export async function processStoryblokInterfaces(pathToSbInterfaceFile: string):
 
   try {
     Tracer.log(LogLevel.DEBUG, `Processing Storyblok interfaces from: ${pathToSbInterfaceFile}`);
-
-    // Load and validate the storyblok.d.ts file as text
-    const storyblokTypesFileContent = await fs.readFile(pathToSbInterfaceFile, "utf-8");
-
-    if (!storyblokTypesFileContent || !storyblokTypesFileContent.trim()) {
-      throw new ValidationError("Storyblok types file is empty or could not be read");
-    }
 
     // Use ts-morph to analyze the file
     const storyblokTypesDefinitionFile = new Project().addSourceFileAtPath(pathToSbInterfaceFile);
@@ -36,7 +25,7 @@ export async function processStoryblokInterfaces(pathToSbInterfaceFile: string):
       const interfaceName = currentInterface.getName();
 
       try {
-        const schema = extractSbInterfaceToZod(currentInterface, storyblokTypesFileContent);
+        const schema = extractSbInterfaceToZod(currentInterface);
         schemaRegistry.set(interfaceName, schema);
         Tracer.log(LogLevel.DEBUG, `Processed interface: ${interfaceName}`);
       } catch (error) {
