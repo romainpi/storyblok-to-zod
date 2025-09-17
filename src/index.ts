@@ -92,26 +92,37 @@ Tracer.log(LogLevel.VERBOSE, `Found ${componentFiles.length} component JSON file
 const componentDependencies = new Map<string, string[]>();
 for (const fileName of componentFiles) {
   const componentName = path.basename(fileName, ".json");
-  const fileContent = await safeReadJsonFile(path.join(jsonPath, fileName));
-  const schemaData = fileContent.schema as Record<string, Components.ComponentSchemaField> | undefined;
 
-  if (!schemaData) {
-    Tracer.log(LogLevel.WARN, `Invalid or missing schema in JSON for component '${componentName}'. Skipping.`);
-    continue;
-  }
+  try {
+    const fileContent = await safeReadJsonFile(path.join(jsonPath, fileName));
+    const schemaData = fileContent?.schema as Record<string, Components.ComponentSchemaField> | undefined;
 
-  const dependencies: string[] = [];
-  for (const fieldName of Object.keys(schemaData)) {
-    const field = schemaData[fieldName];
-
-    if (!field) continue;
-
-    if (field.type === "bloks" && Array.isArray(field.component_whitelist)) {
-      dependencies.push(...field.component_whitelist);
+    if (!schemaData) {
+      Tracer.log(LogLevel.WARN, `Invalid or missing schema in JSON for component '${componentName}'. Skipping.`);
+      continue;
     }
-  }
 
-  componentDependencies.set(componentName, dependencies);
+    const dependencies: string[] = [];
+    for (const fieldName of Object.keys(schemaData)) {
+      const field = schemaData[fieldName];
+
+      if (!field || field.type !== "bloks" || !Array.isArray(field.component_whitelist)) {
+        continue;
+      }
+
+      dependencies.push(...field.component_whitelist.filter((comp) => typeof comp === "string"));
+    }
+
+    componentDependencies.set(componentName, dependencies);
+    Tracer.log(LogLevel.DEBUG, `Component '${componentName}' has dependencies: [${dependencies.join(", ")}]`);
+  } catch (error) {
+    Tracer.log(
+      LogLevel.WARN,
+      `Failed to process component '${componentName}': ${
+        error instanceof Error ? error.message : "Unknown error"
+      }. Skipping.`
+    );
+  }
 }
 
 const sortedComponents = performTopologicalSort(componentDependencies);
