@@ -10,7 +10,7 @@ import extractSbInterfaceToZod from "./functions/extractSbInterfaceToZod";
 import * as CONSTANTS from "./constants";
 import { Command } from "commander";
 import { safeWriteFile } from "./utils";
-import { validateCLIOptions, validatePaths } from "./validation";
+import { FileOperationError, validateCLIOptions, validatePaths, ValidationError } from "./validation";
 
 const program = new Command();
 program
@@ -136,7 +136,21 @@ for (const component of componentDependencies.keys()) {
 
 // Start conversion process
 for (const componentName of sortedComponents) {
-  await convertComponentJsonToZod(componentName, jsonPath);
+  try {
+    await convertComponentJsonToZod(componentName, jsonPath);
+    Tracer.log(LogLevel.VERBOSE, `Converted component: ${componentName}`);
+  } catch (error) {
+    Tracer.log(
+      LogLevel.ERROR,
+      `Failed to convert component '${componentName}': ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+
+    // Continue with other components instead of failing entirely
+    if (error instanceof ValidationError || error instanceof FileOperationError) {
+      continue;
+    }
+    throw error;
+  }
 }
 
 // Generate final output
