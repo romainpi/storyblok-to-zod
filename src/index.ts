@@ -108,30 +108,52 @@ for (const fileName of componentFiles) {
   componentDependencies.set(componentName, dependencies);
 }
 
-// Simple topological sort to determine conversion order
-const sortedComponents: string[] = [];
-const visited = new Set<string>();
+const sortedComponents = performTopologicalSort(componentDependencies);
 
-function visit(component: string, tempMarks: Set<string>) {
-  if (tempMarks.has(component)) {
-    throw new Error(`Cyclic dependency detected involving component '${component}'`);
-  }
-  if (!visited.has(component)) {
-    tempMarks.add(component);
-    const deps = componentDependencies.get(component) || [];
-    for (const dep of deps) {
-      if (componentDependencies.has(dep)) {
-        visit(dep, tempMarks);
-      }
+/**
+ * Perform topological sort on component dependencies
+ */
+function performTopologicalSort(componentDependencies: Map<string, string[]>): string[] {
+  const sortedComponents: string[] = [];
+  const visited = new Set<string>();
+
+  function visit(component: string, tempMarks: Set<string>): void {
+    if (tempMarks.has(component)) {
+      throw new ValidationError(`Cyclic dependency detected involving component '${component}'`, {
+        component,
+        tempMarks: Array.from(tempMarks),
+      });
     }
-    tempMarks.delete(component);
-    visited.add(component);
-    sortedComponents.push(component);
-  }
-}
 
-for (const component of componentDependencies.keys()) {
-  visit(component, new Set<string>());
+    if (!visited.has(component)) {
+      tempMarks.add(component);
+      const deps = componentDependencies.get(component) || [];
+
+      for (const dep of deps) {
+        if (componentDependencies.has(dep)) {
+          visit(dep, tempMarks);
+        }
+      }
+
+      tempMarks.delete(component);
+      visited.add(component);
+      sortedComponents.push(component);
+    }
+  }
+
+  try {
+    for (const component of componentDependencies.keys()) {
+      visit(component, new Set<string>());
+    }
+
+    Tracer.log(LogLevel.DEBUG, `Component conversion order: [${sortedComponents.join(", ")}]`);
+    return sortedComponents;
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      throw error;
+    }
+    throw new Error(`Failed to sort components: ${error instanceof Error ? error.message : "Unknown error"}`);
+  }
 }
 
 // Start conversion process
