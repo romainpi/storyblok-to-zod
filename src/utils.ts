@@ -11,6 +11,10 @@ export function kebabToPascalCase(text: string): string {
   return text.replace(/(^\w|-\w)/g, clearAndUpper);
 }
 
+export function pascalToCamelCase(text: string): string {
+  return text.charAt(0).toLowerCase() + text.slice(1);
+}
+
 /**
  * Safely writes content to a file with directory creation
  */

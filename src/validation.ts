@@ -52,6 +52,7 @@ export interface CLIOptions {
   output?: string;
   verbose?: boolean;
   debug?: boolean;
+  extendsArray?: boolean;
 }
 
 export function validateCLIOptions(options: any): CLIOptions {
@@ -75,6 +76,7 @@ export function validateCLIOptions(options: any): CLIOptions {
     output: options.output,
     verbose: Boolean(options.verbose),
     debug: Boolean(options.debug),
+    extendsArray: Boolean(options.extendsArray),
   };
 }
 

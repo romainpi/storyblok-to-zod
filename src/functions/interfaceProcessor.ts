@@ -1,12 +1,15 @@
 import { Project } from "ts-morph";
 import { LogLevel, Tracer } from "../statics/Tracer";
 import extractSbInterfaceToZod from "./extractSbInterfaceToZod";
-import { FileOperationError, ValidationError } from "../validation";
+import { CLIOptions, FileOperationError, ValidationError } from "../validation";
 
 /**
  * Process Storyblok interface definitions
  */
-export async function processStoryblokInterfaces(pathToSbInterfaceFile: string): Promise<Map<string, string>> {
+export async function processStoryblokInterfaces(
+  pathToSbInterfaceFile: string,
+  options: CLIOptions
+): Promise<Map<string, string>> {
   const schemaRegistry = new Map<string, string>();
 
   try {
@@ -25,7 +28,7 @@ export async function processStoryblokInterfaces(pathToSbInterfaceFile: string):
       const interfaceName = currentInterface.getName();
 
       try {
-        const schema = extractSbInterfaceToZod(currentInterface);
+        const schema = extractSbInterfaceToZod(currentInterface, options);
         schemaRegistry.set(interfaceName, schema);
         Tracer.log(LogLevel.DEBUG, `Processed interface: ${interfaceName}`);
       } catch (error) {

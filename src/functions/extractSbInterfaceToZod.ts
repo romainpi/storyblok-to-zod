@@ -1,7 +1,8 @@
 import { generate } from "ts-to-zod";
 import { LogLevel, Tracer } from "../statics/Tracer";
-import { ValidationError, isNonEmptyString } from "../validation";
+import { CLIOptions, ValidationError, isNonEmptyString } from "../validation";
 import { InterfaceDeclaration } from "ts-morph";
+import { pascalToCamelCase } from "../utils";
 
 /**
  * Extracts a TypeScript interface from Storyblok's types definitions and returns it to a Zod schema.
@@ -18,7 +19,10 @@ import { InterfaceDeclaration } from "ts-morph";
  * // Returns: "export const StoryblokAssetSchema = z.object({ ... });"
  * ```
  */
-export default function extractSbInterfaceToZod(interfaceDeclaration: InterfaceDeclaration): string {
+export default function extractSbInterfaceToZod(
+  interfaceDeclaration: InterfaceDeclaration,
+  options: CLIOptions
+): string {
   const interfaceName = interfaceDeclaration.getName();
   Tracer.log(LogLevel.DEBUG, `Enter with interfaceName='${interfaceName}'`, "extractSbInterfaceToZod");
 
@@ -30,6 +34,53 @@ export default function extractSbInterfaceToZod(interfaceDeclaration: InterfaceD
     `Found interface '${interfaceName}' with ${interfaceProperties.length} properties`,
     "extractSbInterfaceToZod"
   );
+
+  /*
+  We have a special case for Storyblok's "StoryblokMultiasset" interface which extends Array<StoryblokAsset> as follows:
+  ```
+  interface StoryblokMultiasset extends Array<StoryblokAsset> {
+  }
+  ```
+
+  The test is:
+  - the interface has only one "extends" clause
+  - the interface "extends" clause is an Array<T> or a T[] expression
+  - the interface has zero properties
+
+  */
+  const extendsExpressions = interfaceDeclaration.getExtends();
+  const typeArgs = extendsExpressions.map((expr) => expr.getTypeArguments().map((arg) => arg.getText())).flat();
+
+  const entriesTest = extendsExpressions.length === 1 && interfaceProperties.length === 0;
+  const hasMultiAssetExtensionSignature =
+    entriesTest &&
+    extendsExpressions[0] &&
+    (extendsExpressions[0].getText().startsWith("Array<") || extendsExpressions[0].getText().endsWith("[]"));
+
+  if (hasMultiAssetExtensionSignature && options.extendsArray) {
+    // In that case we want to generate a Zod schema like this:
+    // const storyblokMultiassetSchema = z.array(storyblokAssetSchema);
+
+    Tracer.log(
+      LogLevel.VERBOSE,
+      `Interface '${interfaceName}' has signature of type 'storyblokMultiassetSchema'. Bypassing 'ts-to-zod'...`,
+      "extractSbInterfaceToZod"
+    );
+
+    const arrayTypeArg = typeArgs[0]; // Should be the "Something" in Array<Something> or Something[]
+    if (!arrayTypeArg || !isNonEmptyString(arrayTypeArg)) {
+      throw new ValidationError(
+        `Failed to determine array type argument for interface '${interfaceName}' extending Array<T>`,
+        { typeName: interfaceName }
+      );
+    }
+
+    const zodSchema = `const ${pascalToCamelCase(interfaceName)}Schema = z.array(${pascalToCamelCase(
+      arrayTypeArg
+    )}Schema);`;
+
+    return zodSchema;
+  }
 
   try {
     // Validate inputs

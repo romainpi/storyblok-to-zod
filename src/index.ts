@@ -16,7 +16,8 @@ program
   .option("-o, --output <filePath>", "output to file")
   .option("-f, --folder <folderPath>", "path to the folder containing Storyblok components", ".storyblok")
   .option("-v, --verbose", "show verbose information")
-  .option("-d, --debug", "show debug information");
+  .option("-d, --debug", "show debug information")
+  .option("--no-extends-array", "will not automatically convert StoryblokMultiasset's interface definition");
 
 program.parse(process.argv);
 
@@ -52,7 +53,7 @@ async function main(): Promise<void> {
     );
 
     // Process Storyblok interface file
-    const schemaRegistry = await processStoryblokInterfaces(pathToSbInterfaceFile);
+    const schemaRegistry = await processStoryblokInterfaces(pathToSbInterfaceFile, options);
 
     // Process component files
     const componentFiles = await discoverComponentFiles(jsonPath);
