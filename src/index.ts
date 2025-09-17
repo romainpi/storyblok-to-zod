@@ -154,29 +154,39 @@ function performTopologicalSort(componentDependencies: Map<string, string[]>): s
   }
 }
 
-// Start conversion process
-for (const componentName of sortedComponents) {
-  try {
-    await convertComponentJsonToZod(componentName, jsonPath);
-    Tracer.log(LogLevel.VERBOSE, `Converted component: ${componentName}`);
-  } catch (error) {
-    Tracer.log(
-      LogLevel.ERROR,
-      `Failed to convert component '${componentName}': ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-
-    // Continue with other components instead of failing entirely
-    if (error instanceof ValidationError || error instanceof FileOperationError) {
-      continue;
-    }
-    throw error;
-  }
-}
+// Convert components
+await convertComponents(sortedComponents, jsonPath);
 
 // Generate final output
 await generateFinalOutput(schemaRegistry, options.output);
 
 console.log(chalk.green("Zod definitions generated successfully at"), chalk.underline(path.resolve(options.output)));
+
+/**
+ * Convert all components to Zod schemas
+ */
+async function convertComponents(sortedComponents: string[], jsonPath: string): Promise<void> {
+  for (const componentName of sortedComponents) {
+    try {
+      await convertComponentJsonToZod(componentName, jsonPath);
+      Tracer.log(LogLevel.VERBOSE, `Converted component: ${componentName}`);
+    } catch (error) {
+      Tracer.log(
+        LogLevel.ERROR,
+        `Failed to convert component '${componentName}': ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+
+      // Continue with other components instead of failing entirely
+      if (error instanceof ValidationError || error instanceof FileOperationError) {
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  const convertedCount = ConvertedComponents.getAll().length;
+  Tracer.log(LogLevel.VERBOSE, `Successfully converted ${convertedCount} components`);
+}
 
 async function generateFinalOutput(schemaRegistry: Map<string, string>, outputPath: string): Promise<void> {
   try {
