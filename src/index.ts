@@ -64,10 +64,18 @@ const storyblokTypesDefinitionFile = new Project().addSourceFileAtPath(pathToSbI
 const storyblokTypesFileContent = await fs.readFile(pathToSbInterfaceFile, "utf-8");
 
 for (const currentInterface of storyblokTypesDefinitionFile.getInterfaces()) {
-  const type = currentInterface.getName();
+  const typeName = currentInterface.getName();
 
-  const schema = extractSbInterfaceToZod(type, storyblokTypesFileContent);
-  schemaRegistry.set(type, schema);
+  try {
+    const schema = extractSbInterfaceToZod(typeName, storyblokTypesFileContent);
+    schemaRegistry.set(typeName, schema);
+    Tracer.log(LogLevel.DEBUG, `Processed interface: ${typeName}`);
+  } catch (error) {
+    Tracer.log(
+      LogLevel.WARN,
+      `Failed to process interface '${typeName}': ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 Tracer.log(LogLevel.DEBUG);
