@@ -10,7 +10,13 @@ import extractSbInterfaceToZod from "./functions/extractSbInterfaceToZod";
 import * as CONSTANTS from "./constants";
 import { Command } from "commander";
 import { safeReadJsonFile, safeWriteFile } from "./utils";
-import { FileOperationError, validateCLIOptions, validatePaths, ValidationError } from "./validation";
+import {
+  FileOperationError,
+  isValidDirectoryPath,
+  validateCLIOptions,
+  validatePaths,
+  ValidationError,
+} from "./validation";
 
 const program = new Command();
 program
@@ -50,52 +56,17 @@ Tracer.log(
 // Process Storyblok interface file
 const schemaRegistry = await processStoryblokInterfaces(pathToSbInterfaceFile);
 
-// List all components in the JSON_PATH directory
-const allFiles = await fs.readdir(jsonPath);
+// Process component files
+const componentFiles = await discoverComponentFiles(jsonPath);
 
-const ignoredFiles = ["groups.json", "tags.json"];
-const componentFiles = allFiles.filter((file) => file.endsWith(".json") && !ignoredFiles.includes(file));
+if (componentFiles.length === 0) {
+  Tracer.log(LogLevel.WARN, `No component files found in ${jsonPath}`);
+}
 
 Tracer.log(LogLevel.VERBOSE, `Found ${componentFiles.length} component JSON files in folder '${jsonPath}'.`);
 
-// Scan all components and create a dependency graph to determine conversion order:
-const componentDependencies = new Map<string, string[]>();
-for (const fileName of componentFiles) {
-  const componentName = path.basename(fileName, ".json");
-
-  try {
-    const fileContent = await safeReadJsonFile(path.join(jsonPath, fileName));
-    const schemaData = fileContent?.schema as Record<string, Components.ComponentSchemaField> | undefined;
-
-    if (!schemaData) {
-      Tracer.log(LogLevel.WARN, `Invalid or missing schema in JSON for component '${componentName}'. Skipping.`);
-      continue;
-    }
-
-    const dependencies: string[] = [];
-    for (const fieldName of Object.keys(schemaData)) {
-      const field = schemaData[fieldName];
-
-      if (!field || field.type !== "bloks" || !Array.isArray(field.component_whitelist)) {
-        continue;
-      }
-
-      dependencies.push(...field.component_whitelist.filter((comp) => typeof comp === "string"));
-    }
-
-    componentDependencies.set(componentName, dependencies);
-    Tracer.log(LogLevel.DEBUG, `Component '${componentName}' has dependencies: [${dependencies.join(", ")}]`);
-  } catch (error) {
-    Tracer.log(
-      LogLevel.WARN,
-      `Failed to process component '${componentName}': ${
-        error instanceof Error ? error.message : "Unknown error"
-      }. Skipping.`
-    );
-  }
-}
-
-const sortedComponents = performTopologicalSort(componentDependencies);
+// Build dependency graph and sort components
+const sortedComponents = await buildDependencyGraph(componentFiles, jsonPath);
 
 /**
  * Process Storyblok interface definitions
@@ -147,6 +118,80 @@ async function processStoryblokInterfaces(pathToSbInterfaceFile: string): Promis
       `Failed to process Storyblok interfaces: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
+}
+
+/**
+ * Discover and validate component files
+ */
+async function discoverComponentFiles(jsonPath: string): Promise<string[]> {
+  try {
+    if (!(await isValidDirectoryPath(jsonPath))) {
+      throw new ValidationError(`Components directory does not exist: ${jsonPath}`);
+    }
+
+    const allFiles = await fs.readdir(jsonPath);
+    const ignoredFiles = ["groups.json", "tags.json"];
+    const componentFiles = allFiles.filter((file) => file.endsWith(".json") && !ignoredFiles.includes(file));
+
+    Tracer.log(LogLevel.DEBUG, `Discovered ${componentFiles.length} component files in ${jsonPath}`);
+
+    return componentFiles;
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      throw error;
+    }
+    throw new FileOperationError(
+      `Failed to discover component files: ${error instanceof Error ? error.message : "Unknown error"}`,
+      jsonPath,
+      "readdir"
+    );
+  }
+}
+
+/**
+ * Build dependency graph and determine conversion order
+ */
+async function buildDependencyGraph(componentFiles: string[], jsonPath: string): Promise<string[]> {
+  const componentDependencies = new Map<string, string[]>();
+
+  // Scan all components and create a dependency graph
+  for (const fileName of componentFiles) {
+    const componentName = path.basename(fileName, ".json");
+
+    try {
+      const fileContent = await safeReadJsonFile(path.join(jsonPath, fileName));
+      const schemaData = fileContent?.schema as Record<string, Components.ComponentSchemaField> | undefined;
+
+      if (!schemaData) {
+        Tracer.log(LogLevel.WARN, `Invalid or missing schema in JSON for component '${componentName}'. Skipping.`);
+        continue;
+      }
+
+      const dependencies: string[] = [];
+      for (const fieldName of Object.keys(schemaData)) {
+        const field = schemaData[fieldName];
+
+        if (!field || field.type !== "bloks" || !Array.isArray(field.component_whitelist)) {
+          continue;
+        }
+
+        dependencies.push(...field.component_whitelist.filter((comp) => typeof comp === "string"));
+      }
+
+      componentDependencies.set(componentName, dependencies);
+      Tracer.log(LogLevel.DEBUG, `Component '${componentName}' has dependencies: [${dependencies.join(", ")}]`);
+    } catch (error) {
+      Tracer.log(
+        LogLevel.WARN,
+        `Failed to process component '${componentName}': ${
+          error instanceof Error ? error.message : "Unknown error"
+        }. Skipping.`
+      );
+    }
+  }
+
+  // Topological sort to determine conversion order
+  return performTopologicalSort(componentDependencies);
 }
 
 /**
