@@ -9,7 +9,7 @@ import { ConvertedComponents } from "./statics/ConvertedComponents";
 import extractSbInterfaceToZod from "./functions/extractSbInterfaceToZod";
 import * as CONSTANTS from "./constants";
 import { Command } from "commander";
-import { safeWriteFile } from "./utils";
+import { safeReadJsonFile, safeWriteFile } from "./utils";
 import { FileOperationError, validateCLIOptions, validatePaths, ValidationError } from "./validation";
 
 const program = new Command();
@@ -84,12 +84,10 @@ Tracer.log(LogLevel.VERBOSE, `Found ${componentFiles.length} component JSON file
 const componentDependencies = new Map<string, string[]>();
 for (const fileName of componentFiles) {
   const componentName = path.basename(fileName, ".json");
-  const fileContent = await fs.readFile(path.join(jsonPath, fileName), "utf-8");
-  const jsonData = JSON.parse(fileContent);
+  const fileContent = await safeReadJsonFile(path.join(jsonPath, fileName));
+  const schemaData = fileContent.schema as Record<string, Components.ComponentSchemaField> | undefined;
 
-  const schemaData = jsonData.schema as Record<string, Components.ComponentSchemaField> | undefined;
-
-  if (!jsonData || !schemaData) {
+  if (!schemaData) {
     Tracer.log(LogLevel.WARN, `Invalid or missing schema in JSON for component '${componentName}'. Skipping.`);
     continue;
   }
