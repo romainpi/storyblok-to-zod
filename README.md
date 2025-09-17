@@ -26,22 +26,44 @@ schemas directly from your Storyblok components.
 
 ## Notes
 
-### `--no-extends-array`
-
-`ts-to-zod` appears to be unable to convert the definition of
+- __`--no-extends-array`:__  
+  `ts-to-zod` appears to be unable to convert the definition of
 `StoryblokMultiasset` because it `extends Array<StoryblokAsset>`. This tool will
 bypass `ts-to-zod` and automatically convert `StoryblokMultiasset`. You may
 disable this behaviour by specifying `--no-extends-array`.
 
-### `ts-to-zod` version
-
-Using `ts-to-zod` version `^3.15.0` because Astro hasn't updated to Zod v4 yet.
+- __`ts-to-zod` version:__  
+  Using `ts-to-zod` version `^3.15.0` because Astro hasn't updated to Zod v4 yet.
 
 ## Usage
 
+### Without installation
+
+```sh
+# With npm
+npx storyblok-to-zod --space STORYBLOK_SPACE_ID
+```
+
+<details>
+<summary>With pnpm</summary>
+```sh
+# With pnpm
+pnpm dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
+```
+</details>
+
+<details>
+<summary>With yarn</summary>
+```sh
+# With yarn
+yarn dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
+```
+</details>
+
 ### With installation
 
-Installation:
+<details>
+<summary>Installing</summary>
 
 ```sh
 # With npm
@@ -54,6 +76,8 @@ pnpm add storyblok-to-zod --dev
 yarn add storyblok-to-zod --dev
 ```
 
+</details>
+
 Running:
 
 ```sh
@@ -62,19 +86,6 @@ pnpm storyblok-to-zod --space STORYBLOK_SPACE_ID
 
 # With yarn
 yarn storyblok-to-zod --space STORYBLOK_SPACE_ID
-```
-
-### Without installation
-
-```sh
-# With npm
-npx storyblok-to-zod --space STORYBLOK_SPACE_ID
-
-# With pnpm
-pnpm dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
-
-# With yarn
-yarn dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
 ```
 
 ## TODO
