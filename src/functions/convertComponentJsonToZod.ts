@@ -3,7 +3,13 @@ import path from "path";
 import { LogLevel, Tracer } from "../statics/Tracer";
 import { kebabToCamelCase, safeReadJsonFile } from "../utils";
 import { ConvertedComponents } from "../statics/ConvertedComponents";
-import { validateComponentData } from "../validation";
+import {
+  FileOperationError,
+  isValidComponentSchemaField,
+  validateComponentData,
+  validateComponentName,
+  ValidationError,
+} from "../validation";
 
 /**
  * Converts a Storyblok component schema JSON file to a Zod schema definition.
@@ -25,7 +31,8 @@ import { validateComponentData } from "../validation";
  * // Returns: "export const heroSectionSchema = z.object({ ... });"
  * ```
  *
- * @throws Will throw an error if the JSON file cannot be read or parsed
+ * @throws {ValidationError} When component name is invalid or component data is malformed
+ * @throws {FileOperationError} When the JSON file cannot be read or parsed
  */
 export default async function convertComponentJsonToZod(
   componentName: string,
@@ -33,70 +40,82 @@ export default async function convertComponentJsonToZod(
 ): Promise<string> {
   Tracer.log(LogLevel.DEBUG, `Enter with componentName='${componentName}'`, "convertComponentJsonToZod");
 
-  // Load the JSON file for the component
-  const inputFilePath = path.join(containingFolder, componentName + ".json");
-  const jsonData = await safeReadJsonFile(inputFilePath, (data) => validateComponentData(data, componentName));
+  try {
+    // Validate component name format
+    validateComponentName(componentName);
 
-  // Format the component name to camelCase and add 'Schema' suffix
-  const componentNameCamel = kebabToCamelCase(componentName) + "Schema";
-  let outputContent = `export const ${componentNameCamel} = z.object({\n`;
+    // Load and validate the JSON file for the component
+    const inputFilePath = path.join(containingFolder, componentName + ".json");
 
-  const schemaData = jsonData.schema;
+    const jsonData = await safeReadJsonFile(inputFilePath, (data) => validateComponentData(data, componentName));
 
-  if (!jsonData || !schemaData) {
-    throw new Error(`Invalid or missing schema in JSON for component '${componentName}'.`);
-  }
+    // Format the component name to camelCase and add 'Schema' suffix
+    const componentNameCamel = kebabToCamelCase(componentName) + "Schema";
+    let outputContent = `export const ${componentNameCamel} = z.object({\n`;
 
-  for (const propName of Object.keys(schemaData)) {
-    if (schemaData[propName] === undefined) {
-      Tracer.log(
-        LogLevel.WARN,
-        `Field '${propName}' in component '${componentName}' is undefined. Defaulting to 'z.any()'.`
-      );
-      outputContent += `  ${propName}: z.any(),\n`;
-      continue;
+    const schemaData = jsonData.schema;
+
+    for (const propName of Object.keys(schemaData)) {
+      const value = schemaData[propName];
+
+      if (!value) {
+        Tracer.log(LogLevel.WARN, `Field '${propName}' in component '${componentName}' is null/undefined. Skipping.`);
+        continue;
+      }
+
+      if (!isValidComponentSchemaField(value)) {
+        Tracer.log(
+          LogLevel.WARN,
+          `Field '${propName}' in component '${componentName}' has invalid structure. Defaulting to 'z.any()'.`
+        );
+        outputContent += `  ${propName}: z.any(),\n`;
+        continue;
+      }
+
+      Tracer.log(LogLevel.DEBUG, `propName: '${propName}', value.type: '${value.type}'`, "convertComponentJsonToZod");
+
+      // Skip certain types
+      const skippableTypes = ["tab", "section"];
+      if (value.type && skippableTypes.includes(value.type)) {
+        continue;
+      }
+
+      const required = value.required || false;
+
+      const zodType = convertSbToZodType(value, componentName);
+
+      outputContent += `  ${propName}: ${zodType}`;
+      if (!required) {
+        outputContent += `.optional()`;
+      }
+      outputContent += ",\n";
     }
 
-    const value: Components.ComponentSchemaField = schemaData[propName];
+    outputContent += "});\n";
 
-    Tracer.log(LogLevel.DEBUG, `propName: '${propName}', value.type: '${value.type}'`, "convertComponentJsonToZod");
+    ConvertedComponents.add(componentName, outputContent);
 
-    if (!value.type) {
+    Tracer.log(LogLevel.DEBUG, `Successfully converted component '${componentName}'`);
+
+    return outputContent;
+  } catch (error) {
+    if (error instanceof ValidationError || error instanceof FileOperationError) {
       Tracer.log(
-        LogLevel.WARN,
-        `Field '${propName}' in component '${componentName}' is missing a 'type' property. Defaulting to 'z.any()'. Full field definition: ${JSON.stringify(
-          value
-        )}`,
+        LogLevel.ERROR,
+        `Failed to convert component '${componentName}': ${error.message}`,
         "convertComponentJsonToZod"
       );
-      outputContent += `  ${propName}: z.any(),\n`;
-      continue;
+      throw error;
     }
 
-    // Skip certain types
-    const skippableTypes = ["tab", "section"];
-    if (skippableTypes.includes(value.type)) {
-      continue;
-    }
-
-    const required = value.required || false;
-
-    const zodType = convertSbToZodType(value, componentName);
-
-    outputContent += `  ${propName}: ${zodType}`;
-    if (!required) {
-      outputContent += `.optional()`;
-    }
-    outputContent += ",\n";
+    const unknownError = new Error(
+      `Unexpected error converting component '${componentName}': ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
+    Tracer.log(LogLevel.ERROR, unknownError.message, "convertComponentJsonToZod");
+    throw unknownError;
   }
-
-  outputContent += "});\n";
-
-  ConvertedComponents.add(componentName, outputContent);
-
-  Tracer.log(LogLevel.DEBUG);
-
-  return outputContent;
 }
 
 /**

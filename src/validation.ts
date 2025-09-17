@@ -180,3 +180,18 @@ export async function validatePaths(options: CLIOptions): Promise<void> {
     throw new ValidationError(`Path validation failed: ${errors.join("; ")}`, { options });
   }
 }
+
+/**
+ * Validates component name format
+ */
+export function validateComponentName(componentName: string): void {
+  if (!isNonEmptyString(componentName)) {
+    throw new ValidationError("Component name must be a non-empty string", { componentName });
+  }
+
+  // Check for valid kebab-case format
+  const kebabCaseRegex = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
+  if (!kebabCaseRegex.test(componentName)) {
+    throw new ValidationError(`Component name '${componentName}' is not in valid kebab-case format`, { componentName });
+  }
+}
