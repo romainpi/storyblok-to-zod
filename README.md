@@ -12,29 +12,6 @@ Converting Storyblok's CLI output to Zod schemas with [`ts-to-zod`] can be
 problematic. This tool helps with this process by generating compatible Zod
 schemas directly from your Storyblok components.
 
-## Options
-
-| Option              | Short | Description                                            | Default                      |
-| ---------           | ----- | ------------------------------------------------------ | ---------------------------- |
-| --space             | -s    | (Required) The ID of your Storyblok space              | -                            |
-| --output            | -o    | Output to file                                         | -                            |
-| --folder            | -f    | Path to the folder containing the Storyblok components | '.storyblok'                 |
-| --verbose           | -v    | Verbose mode                                           | false                        |
-| --debug             | -d    | Show debug information                                 | false                        |
-| --help              | -h    | Show command help                                      | false                        |
-| --no-extends-array  |       | Will not automatically convert `StoryblokMultiasset`   | -                            |
-
-## Notes
-
-- __`--no-extends-array`:__  
-  `ts-to-zod` appears to be unable to convert the definition of
-`StoryblokMultiasset` because it `extends Array<StoryblokAsset>`. This tool will
-bypass `ts-to-zod` and automatically convert `StoryblokMultiasset`. You may
-disable this behaviour by specifying `--no-extends-array`.
-
-- __`ts-to-zod` version:__  
-  Using `ts-to-zod` version `^3.15.0` because Astro hasn't updated to Zod v4 yet.
-
 ## Usage
 
 ### Without installation
@@ -87,6 +64,29 @@ pnpm storyblok-to-zod --space STORYBLOK_SPACE_ID
 # With yarn
 yarn storyblok-to-zod --space STORYBLOK_SPACE_ID
 ```
+
+## Options
+
+| Option              | Short | Description                                            | Default                      |
+| ---------           | ----- | ------------------------------------------------------ | ---------------------------- |
+| --space             | -s    | (Required) The ID of your Storyblok space              | -                            |
+| --output            | -o    | Output to file                                         | -                            |
+| --folder            | -f    | Path to the folder containing the Storyblok components | '.storyblok'                 |
+| --verbose           | -v    | Verbose mode                                           | false                        |
+| --debug             | -d    | Show debug information                                 | false                        |
+| --help              | -h    | Show command help                                      | false                        |
+| --no-extends-array  |       | Will not automatically convert `StoryblokMultiasset`   | -                            |
+
+## Notes
+
+- __`--no-extends-array`:__  
+  `ts-to-zod` appears to be unable to convert the definition of
+`StoryblokMultiasset` because it `extends Array<StoryblokAsset>`. This tool will
+bypass `ts-to-zod` and automatically convert `StoryblokMultiasset`. You may
+disable this behaviour by specifying `--no-extends-array`.
+
+- __`ts-to-zod` version:__  
+  Using `ts-to-zod` version `^3.15.0` because Astro hasn't updated to Zod v4 yet.
 
 ## TODO
 
