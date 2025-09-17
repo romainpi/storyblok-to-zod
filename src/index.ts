@@ -47,43 +47,8 @@ Tracer.log(
   `Resolved paths - folder: ${folderPath}, json: ${jsonPath}, types: ${pathToSbInterfaceFile}`
 );
 
-/** A registry to store converted Zod schemas for Storyblok native types */
-const schemaRegistry = new Map<string, string>();
-
-Tracer.log(LogLevel.DEBUG, `pathToSbInterfaceFile: '${pathToSbInterfaceFile}'`);
-
-// Check file exists
-try {
-  await fs.access(pathToSbInterfaceFile);
-
-  Tracer.log(LogLevel.DEBUG, `The specified file '${pathToSbInterfaceFile}' exists and is accessible.`);
-} catch (err) {
-  Tracer.log(LogLevel.ERROR, `The specified file "${pathToSbInterfaceFile}" does not exist or is not accessible.`);
-  process.exit(1);
-}
-
-// Load the storyblok.d.ts file using ts-morph to analyze imports
-const storyblokTypesDefinitionFile = new Project().addSourceFileAtPath(pathToSbInterfaceFile);
-
-// Extract the definition of interface StoryblokAsset from src/types/storyblok.d.ts
-const storyblokTypesFileContent = await fs.readFile(pathToSbInterfaceFile, "utf-8");
-
-for (const currentInterface of storyblokTypesDefinitionFile.getInterfaces()) {
-  const typeName = currentInterface.getName();
-
-  try {
-    const schema = extractSbInterfaceToZod(typeName, storyblokTypesFileContent);
-    schemaRegistry.set(typeName, schema);
-    Tracer.log(LogLevel.DEBUG, `Processed interface: ${typeName}`);
-  } catch (error) {
-    Tracer.log(
-      LogLevel.WARN,
-      `Failed to process interface '${typeName}': ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
-}
-
-Tracer.log(LogLevel.DEBUG);
+// Process Storyblok interface file
+const schemaRegistry = await processStoryblokInterfaces(pathToSbInterfaceFile);
 
 // List all components in the JSON_PATH directory
 const allFiles = await fs.readdir(jsonPath);
@@ -131,6 +96,58 @@ for (const fileName of componentFiles) {
 }
 
 const sortedComponents = performTopologicalSort(componentDependencies);
+
+/**
+ * Process Storyblok interface definitions
+ */
+async function processStoryblokInterfaces(pathToSbInterfaceFile: string): Promise<Map<string, string>> {
+  const schemaRegistry = new Map<string, string>();
+
+  try {
+    Tracer.log(LogLevel.DEBUG, `Processing Storyblok interfaces from: ${pathToSbInterfaceFile}`);
+
+    // Load and validate the storyblok.d.ts file as text
+    const storyblokTypesFileContent = await fs.readFile(pathToSbInterfaceFile, "utf-8");
+
+    if (!storyblokTypesFileContent || !storyblokTypesFileContent.trim()) {
+      throw new ValidationError("Storyblok types file is empty or could not be read");
+    }
+
+    // Use ts-morph to analyze the file
+    const storyblokTypesDefinitionFile = new Project().addSourceFileAtPath(pathToSbInterfaceFile);
+    const interfaces = storyblokTypesDefinitionFile.getInterfaces();
+
+    if (interfaces.length === 0) {
+      Tracer.log(LogLevel.WARN, "No interfaces found in Storyblok types file");
+      return schemaRegistry;
+    }
+
+    for (const currentInterface of interfaces) {
+      const typeName = currentInterface.getName();
+
+      try {
+        const schema = extractSbInterfaceToZod(typeName, storyblokTypesFileContent);
+        schemaRegistry.set(typeName, schema);
+        Tracer.log(LogLevel.DEBUG, `Processed interface: ${typeName}`);
+      } catch (error) {
+        Tracer.log(
+          LogLevel.WARN,
+          `Failed to process interface '${typeName}': ${error instanceof Error ? error.message : "Unknown error"}`
+        );
+      }
+    }
+
+    Tracer.log(LogLevel.VERBOSE, `Processed ${schemaRegistry.size} interfaces`);
+    return schemaRegistry;
+  } catch (error) {
+    if (error instanceof ValidationError || error instanceof FileOperationError) {
+      throw error;
+    }
+    throw new Error(
+      `Failed to process Storyblok interfaces: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
 
 /**
  * Perform topological sort on component dependencies
