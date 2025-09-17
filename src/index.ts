@@ -134,20 +134,31 @@ for (const componentName of sortedComponents) {
   await convertComponentJsonToZod(componentName, jsonPath);
 }
 
-const allNativeSchemas = Array.from(schemaRegistry.values()).join("\n");
-const allComponentSchemas = Array.from(ConvertedComponents.getAll())
-  .map((result) => result[1])
-  .join("\n");
+// Generate final output
+await generateFinalOutput(schemaRegistry, options.output);
 
-const finalContent = `\
-${CONSTANTS.FILE_HEADER}
-${allNativeSchemas}
-${allComponentSchemas}`;
+console.log(chalk.green("Zod definitions generated successfully at"), chalk.underline(path.resolve(options.output)));
 
-const outputDir = path.dirname(options.output);
-await fs.mkdir(outputDir, { recursive: true });
+async function generateFinalOutput(schemaRegistry: Map<string, string>, outputPath: string): Promise<void> {
+  try {
+    const allNativeSchemas = Array.from(schemaRegistry.values()).join("\n");
+    const allComponentSchemas = Array.from(ConvertedComponents.getAll())
+      .map((result) => result[1])
+      .join("\n");
 
-const outputFilePath = path.join(options.output);
-await fs.writeFile(outputFilePath, finalContent, "utf-8");
+    const finalContent = `${CONSTANTS.FILE_HEADER}\n${allNativeSchemas}\n${allComponentSchemas}`;
 
-console.log(chalk.green("Zod definitions generated successfully at"), chalk.underline(outputFilePath));
+    const resolvedPath = path.resolve(outputPath);
+    const directory = path.dirname(resolvedPath);
+
+    // Ensure directory exists
+    await fs.mkdir(directory, { recursive: true });
+
+    // Write file
+    await fs.writeFile(resolvedPath, finalContent, "utf-8");
+
+    Tracer.log(LogLevel.DEBUG, `Final output written to: ${path.resolve(outputPath)}`);
+  } catch (error) {
+    throw new Error(`Failed to generate final output: ${error instanceof Error ? error.message : "Unknown error"}`);
+  }
+}
