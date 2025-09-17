@@ -22,17 +22,17 @@ export default function extractSbInterfaceToZod(
   interfaceDeclaration: InterfaceDeclaration,
   sbTypesFileContent: string
 ): string {
-  const typeName = interfaceDeclaration.getName();
-  Tracer.log(LogLevel.DEBUG, `Enter with typeName='${typeName}'`, "extractSbInterfaceToZod");
+  const interfaceName = interfaceDeclaration.getName();
+  Tracer.log(LogLevel.DEBUG, `Enter with interfaceName='${interfaceName}'`, "extractSbInterfaceToZod");
 
   const properties = interfaceDeclaration.getProperties();
 
-  Tracer.log(LogLevel.DEBUG, `Found interface '${typeName}' with ${properties.length} properties`, "extractSbInterfaceToZod");
+  Tracer.log(LogLevel.DEBUG, `Found interface '${interfaceName}' with ${properties.length} properties`, "extractSbInterfaceToZod");
 
   try {
     // Validate inputs
-    if (!isNonEmptyString(typeName)) {
-      throw new ValidationError("Type name must be a non-empty string", { typeName });
+    if (!isNonEmptyString(interfaceName)) {
+      throw new ValidationError("Interface's name must be a non-empty string", { typeName: interfaceName });
     }
 
     if (!isNonEmptyString(sbTypesFileContent)) {
@@ -43,13 +43,13 @@ export default function extractSbInterfaceToZod(
     }
 
     // Create regex to find the interface definition
-    const sbAssetInterfaceRegex = new RegExp(`interface ${typeName}( extends.*)* {[^}]+}`);
+    const sbAssetInterfaceRegex = new RegExp(`interface ${interfaceName}( extends.*)* {[^}]+}`);
 
     const sbAssetMatch = sbTypesFileContent.match(sbAssetInterfaceRegex);
 
     if (!sbAssetMatch || !sbAssetMatch[0]) {
-      throw new ValidationError(`Could not find interface '${typeName}' in storyblok.d.ts file`, {
-        typeName,
+      throw new ValidationError(`Could not find interface '${interfaceName}' in storyblok.d.ts file`, {
+        typeName: interfaceName,
         fileContentLength: sbTypesFileContent.length,
         availableInterfaces: extractAvailableInterfaces(sbTypesFileContent),
       });
@@ -58,7 +58,7 @@ export default function extractSbInterfaceToZod(
     const sbAssetInterface = sbAssetMatch[0];
 
     if (!sbAssetInterface.trim()) {
-      throw new ValidationError(`Found empty interface definition for '${typeName}'`, { typeName });
+      throw new ValidationError(`Found empty interface definition for '${interfaceName}'`, { typeName: interfaceName });
     }
 
     // Convert interface to Zod schema using ts-to-zod
@@ -70,21 +70,21 @@ export default function extractSbInterfaceToZod(
       zodSchema = schemaGenerator.getZodSchemasFile("~/types/storyblok.d");
     } catch (error) {
       throw new Error(
-        `Failed to generate Zod schema for interface '${typeName}': ${
+        `Failed to generate Zod schema for interface '${interfaceName}': ${
           error instanceof Error ? error.message : "Unknown ts-to-zod error"
         }`
       );
     }
 
     if (!zodSchema || !zodSchema.trim()) {
-      throw new ValidationError(`Generated empty Zod schema for interface '${typeName}'`, { typeName });
+      throw new ValidationError(`Generated empty Zod schema for interface '${interfaceName}'`, { typeName: interfaceName });
     }
 
     // Remove the first two lines (imports and empty line) and clean up
     const lines = zodSchema.split("\n");
     if (lines.length < 3) {
-      throw new ValidationError(`Generated Zod schema for '${typeName}' has insufficient content`, {
-        typeName,
+      throw new ValidationError(`Generated Zod schema for '${interfaceName}' has insufficient content`, {
+        typeName: interfaceName,
         lineCount: lines.length,
       });
     }
@@ -92,20 +92,20 @@ export default function extractSbInterfaceToZod(
     const cleanedSchema = lines.slice(2).join("\n").trim();
 
     if (!cleanedSchema) {
-      Tracer.log(LogLevel.WARN, `Interface '${typeName}' results in an empty Zod definition`);
+      Tracer.log(LogLevel.WARN, `Interface '${interfaceName}' results in an empty Zod definition`);
     } else {
-      Tracer.log(LogLevel.DEBUG, `Successfully generated Zod schema for '${typeName}'`, "extractSbInterfaceToZod");
+      Tracer.log(LogLevel.DEBUG, `Successfully generated Zod schema for interface '${interfaceName}'`, "extractSbInterfaceToZod");
     }
 
     return cleanedSchema;
   } catch (error) {
     if (error instanceof ValidationError) {
-      Tracer.log(LogLevel.ERROR, `Validation error extracting interface '${typeName}': ${error.message}`);
+      Tracer.log(LogLevel.ERROR, `Validation error extracting interface '${interfaceName}': ${error.message}`);
       throw error;
     }
 
     const wrappedError = new Error(
-      `Unexpected error extracting interface '${typeName}': ${error instanceof Error ? error.message : "Unknown error"}`
+      `Unexpected error extracting interface '${interfaceName}': ${error instanceof Error ? error.message : "Unknown error"}`
     );
 
     Tracer.log(LogLevel.ERROR, wrappedError.message);
