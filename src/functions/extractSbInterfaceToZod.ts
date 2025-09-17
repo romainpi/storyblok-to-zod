@@ -97,11 +97,7 @@ export default function extractSbInterfaceToZod(typeName: string, sbTypesFileCon
     return cleanedSchema;
   } catch (error) {
     if (error instanceof ValidationError) {
-      Tracer.log(
-        LogLevel.ERROR,
-        `Validation error extracting interface '${typeName}': ${error.message}`,
-        "extractSbInterfaceToZod"
-      );
+      Tracer.log(LogLevel.ERROR, `Validation error extracting interface '${typeName}': ${error.message}`);
       throw error;
     }
 
@@ -109,7 +105,7 @@ export default function extractSbInterfaceToZod(typeName: string, sbTypesFileCon
       `Unexpected error extracting interface '${typeName}': ${error instanceof Error ? error.message : "Unknown error"}`
     );
 
-    Tracer.log(LogLevel.ERROR, wrappedError.message, "extractSbInterfaceToZod");
+    Tracer.log(LogLevel.ERROR, wrappedError.message);
     throw wrappedError;
   }
 }

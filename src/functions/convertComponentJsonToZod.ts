@@ -100,11 +100,7 @@ export default async function convertComponentJsonToZod(
     return outputContent;
   } catch (error) {
     if (error instanceof ValidationError || error instanceof FileOperationError) {
-      Tracer.log(
-        LogLevel.ERROR,
-        `Failed to convert component '${componentName}': ${error.message}`,
-        "convertComponentJsonToZod"
-      );
+      Tracer.log(LogLevel.ERROR, `Failed to convert component '${componentName}': ${error.message}`);
       throw error;
     }
 
@@ -113,7 +109,7 @@ export default async function convertComponentJsonToZod(
         error instanceof Error ? error.message : "Unknown error"
       }`
     );
-    Tracer.log(LogLevel.ERROR, unknownError.message, "convertComponentJsonToZod");
+    Tracer.log(LogLevel.ERROR, unknownError.message);
     throw unknownError;
   }
 }
