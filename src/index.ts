@@ -9,6 +9,7 @@ import { ConvertedComponents } from "./statics/ConvertedComponents";
 import extractSbInterfaceToZod from "./functions/extractSbInterfaceToZod";
 import * as CONSTANTS from "./constants";
 import { Command } from "commander";
+import { validateCLIOptions } from "./validation";
 
 const program = new Command();
 program
@@ -22,7 +23,8 @@ program
 
 program.parse(process.argv);
 
-const options = program.opts();
+const rawOptions = program.opts();
+const options = validateCLIOptions(rawOptions);
 
 const logLevel = options.debug ? LogLevel.DEBUG : options.verbose ? LogLevel.VERBOSE : LogLevel.INFO;
 Tracer.logLevel = logLevel;
@@ -34,7 +36,6 @@ if (logLevel >= LogLevel.VERBOSE) {
 // check if folder is a relative or absolute path
 const folderPath = path.resolve(options.folder);
 const jsonPath = `${folderPath}/components/${options.space}/`;
-if (!options.space) throw new Error("Missing Storyblok space ID");
 
 /** A registry to store converted Zod schemas for Storyblok native types */
 const schemaRegistry = new Map<string, string>();
