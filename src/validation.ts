@@ -1,5 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
+import type { Components } from "@storyblok/management-api-client";
+import { LogLevel, Tracer } from "./statics/Tracer";
 
 /**
  * Custom error class for validation errors
@@ -78,6 +80,67 @@ export function validateCLIOptions(options: any): CLIOptions {
     verbose: Boolean(options.verbose),
     debug: Boolean(options.debug),
   };
+}
+
+/**
+ * Validates a Storyblok component schema field
+ */
+export function isValidComponentSchemaField(value: unknown): value is Components.ComponentSchemaField {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const field = value as any;
+  return typeof field.type === "string" && field.type.length > 0;
+}
+
+/**
+ * Validates component JSON data structure
+ */
+export interface ComponentData {
+  schema: Record<string, Components.ComponentSchemaField>;
+}
+
+export function validateComponentData(data: unknown, componentName: string): ComponentData {
+  if (!data || typeof data !== "object") {
+    throw new ValidationError(`Invalid JSON data for component '${componentName}': expected object`, {
+      componentName,
+      dataType: typeof data,
+    });
+  }
+
+  const jsonData = data as any;
+
+  if (!jsonData.schema || typeof jsonData.schema !== "object") {
+    throw new ValidationError(`Missing or invalid schema in component '${componentName}'`, {
+      componentName,
+      hasSchema: !!jsonData.schema,
+      schemaType: typeof jsonData.schema,
+    });
+  }
+
+  const schema = jsonData.schema as Record<string, any>;
+  const validatedSchema: Record<string, Components.ComponentSchemaField> = {};
+
+  for (const [fieldName, fieldValue] of Object.entries(schema)) {
+    if (!isValidComponentSchemaField(fieldValue)) {
+      Tracer.log(
+        LogLevel.WARN,
+        `Invalid field '${fieldName}' in component '${componentName}': ${JSON.stringify(fieldValue)}`
+      );
+      continue;
+    }
+    validatedSchema[fieldName] = fieldValue;
+  }
+
+  if (Object.keys(validatedSchema).length === 0) {
+    throw new ValidationError(`No valid fields found in component '${componentName}'`, {
+      componentName,
+      originalFieldCount: Object.keys(schema).length,
+    });
+  }
+
+  return { schema: validatedSchema };
 }
 
 /**

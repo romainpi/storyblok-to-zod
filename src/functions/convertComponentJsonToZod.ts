@@ -1,9 +1,9 @@
 import type { Components } from "@storyblok/management-api-client";
-import fs from "fs/promises";
 import path from "path";
 import { LogLevel, Tracer } from "../statics/Tracer";
-import { kebabToCamelCase } from "../utils";
+import { kebabToCamelCase, safeReadJsonFile } from "../utils";
 import { ConvertedComponents } from "../statics/ConvertedComponents";
+import { validateComponentData } from "../validation";
 
 /**
  * Converts a Storyblok component schema JSON file to a Zod schema definition.
@@ -35,19 +35,13 @@ export default async function convertComponentJsonToZod(
 
   // Load the JSON file for the component
   const inputFilePath = path.join(containingFolder, componentName + ".json");
-  const fileContent = await fs.readFile(inputFilePath, "utf-8");
-
-  if (!fileContent) {
-    throw new Error(`Could not read file for component '${componentName}' at path '${inputFilePath}'.`);
-  }
+  const jsonData = await safeReadJsonFile(inputFilePath, (data) => validateComponentData(data, componentName));
 
   // Format the component name to camelCase and add 'Schema' suffix
   const componentNameCamel = kebabToCamelCase(componentName) + "Schema";
   let outputContent = `export const ${componentNameCamel} = z.object({\n`;
 
-  // Parse the JSON content
-  const jsonData = JSON.parse(fileContent);
-  const schemaData = jsonData.schema as Record<string, Components.ComponentSchemaField> | undefined;
+  const schemaData = jsonData.schema;
 
   if (!jsonData || !schemaData) {
     throw new Error(`Invalid or missing schema in JSON for component '${componentName}'.`);
