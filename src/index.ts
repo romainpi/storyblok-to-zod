@@ -39,12 +39,17 @@ await validatePaths(options);
 
 // Initialize paths
 const folderPath = path.resolve(options.folder);
-const jsonPath = `${folderPath}/components/${options.space}/`;
+const jsonPath = path.join(folderPath, "components", options.space);
+const pathToSbInterfaceFile = path.join(folderPath, "types", CONSTANTS.SB_INTERFACES_FILE);
+
+Tracer.log(
+  LogLevel.DEBUG,
+  `Resolved paths - folder: ${folderPath}, json: ${jsonPath}, types: ${pathToSbInterfaceFile}`
+);
 
 /** A registry to store converted Zod schemas for Storyblok native types */
 const schemaRegistry = new Map<string, string>();
 
-const pathToSbInterfaceFile = path.join(folderPath, "types", CONSTANTS.SB_INTERFACES_FILE);
 Tracer.log(LogLevel.DEBUG, `pathToSbInterfaceFile: '${pathToSbInterfaceFile}'`);
 
 // Check file exists
