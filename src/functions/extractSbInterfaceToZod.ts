@@ -25,6 +25,10 @@ export default function extractSbInterfaceToZod(
   const typeName = interfaceDeclaration.getName();
   Tracer.log(LogLevel.DEBUG, `Enter with typeName='${typeName}'`, "extractSbInterfaceToZod");
 
+  const properties = interfaceDeclaration.getProperties();
+
+  Tracer.log(LogLevel.DEBUG, `Found interface '${typeName}' with ${properties.length} properties`, "extractSbInterfaceToZod");
+
   try {
     // Validate inputs
     if (!isNonEmptyString(typeName)) {
@@ -56,12 +60,6 @@ export default function extractSbInterfaceToZod(
     if (!sbAssetInterface.trim()) {
       throw new ValidationError(`Found empty interface definition for '${typeName}'`, { typeName });
     }
-
-    Tracer.log(
-      LogLevel.DEBUG,
-      `Found interface '${typeName}' with length ${sbAssetInterface.length}`,
-      "extractSbInterfaceToZod"
-    );
 
     // Convert interface to Zod schema using ts-to-zod
     let schemaGenerator;
