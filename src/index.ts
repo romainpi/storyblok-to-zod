@@ -13,8 +13,8 @@ program
   .name("storyblok-to-zod")
   .description("Generates a Zod schema from your Storyblok components")
   .requiredOption("-s, --space <storyblokSpaceId>", "Storyblok space ID")
-  .option("-o, --output <filePath>", "Output to file")
-  .option("-f, --folder <folderPath>", "Path to the folder containing Storyblok components", ".storyblok")
+  .option("-o, --output <filePath>", "output to file")
+  .option("-f, --folder <folderPath>", "path to the folder containing Storyblok components", ".storyblok")
   .option("-v, --verbose", "show verbose information")
   .option("-d, --debug", "show debug information");
 
