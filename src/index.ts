@@ -9,7 +9,7 @@ import { ConvertedComponents } from "./statics/ConvertedComponents";
 import extractSbInterfaceToZod from "./functions/extractSbInterfaceToZod";
 import * as CONSTANTS from "./constants";
 import { Command } from "commander";
-import { validateCLIOptions } from "./validation";
+import { validateCLIOptions, validatePaths } from "./validation";
 
 const program = new Command();
 program
@@ -33,7 +33,10 @@ if (logLevel >= LogLevel.VERBOSE) {
   Tracer.log(LogLevel.VERBOSE, `Log level set to ${LogLevel[logLevel]}`);
 }
 
-// check if folder is a relative or absolute path
+// Validate all required paths
+await validatePaths(options);
+
+// Initialize paths
 const folderPath = path.resolve(options.folder);
 const jsonPath = `${folderPath}/components/${options.space}/`;
 
