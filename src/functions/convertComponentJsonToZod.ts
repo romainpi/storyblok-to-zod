@@ -149,57 +149,103 @@ function convertSbToZodType(value: Components.ComponentSchemaField, parentCompon
 
   const storyblokType = value.type;
 
-  const stringTypes = ["text", "textarea", "markdown"];
-  const convertToAnyTypes: string[] = [];
+  try {
+    const stringTypes = ["text", "textarea", "markdown"];
+    const convertToAnyTypes: string[] = [];
 
-  if (stringTypes.includes(storyblokType)) {
-    return "z.string()";
-  } else if (convertToAnyTypes.includes(storyblokType)) {
+    if (stringTypes.includes(storyblokType)) {
+      return "z.string()";
+    } else if (convertToAnyTypes.includes(storyblokType)) {
+      return "z.any()";
+    } else if (storyblokType === "bloks") {
+      return handleBloksType(value, parentComponentName);
+    } else if (storyblokType === "multilink") {
+      return "storyblokMultilinkSchema";
+    } else if (storyblokType === "option") {
+      return "z.union([z.number(), z.string()])";
+    } else if (storyblokType === "options") {
+      return "z.array(z.union([z.number(), z.string()]))";
+    } else if (storyblokType === "asset") {
+      return "storyblokAssetSchema";
+    } else if (storyblokType === "richtext") {
+      return "storyblokRichtextSchema";
+    } else if (storyblokType === "number") {
+      return "z.number()";
+    } else if (storyblokType === "boolean") {
+      return "z.boolean()";
+    } else if (storyblokType === "datetime") {
+      return "z.string().datetime()";
+    }
+
+    // Fallback for unknown types
+    Tracer.log(
+      LogLevel.WARN,
+      `Unknown Storyblok field type '${storyblokType}' in component '${parentComponentName}'. Using fallback.`
+    );
+
+    return `z.any() /* Unknown type: ${storyblokType} */`;
+  } catch (error) {
+    Tracer.log(
+      LogLevel.ERROR,
+      `Error converting field type '${storyblokType}' in component '${parentComponentName}': ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
     return "z.any()";
-  } else if (storyblokType === "bloks") {
-    for (const componentName of value.component_whitelist || []) {
-      if (!ConvertedComponents.has(componentName)) {
-        Tracer.log(
-          LogLevel.WARN,
-          `Nested component '${componentName}' used in '${parentComponentName}' has not been converted yet.`
-        );
+  }
+}
 
-        return "z.any()"; // Fallback to z.any() if nested component is not converted
-      }
-    }
-
-    // Assign corresponding Zod schema for bloks field
-    if (value.component_whitelist && value.component_whitelist.length > 0) {
-      if (value.component_whitelist.length == 1) {
-        // If only one component is whitelisted, use that schema directly
-        if (!value.component_whitelist[0]) {
-          Tracer.log(
-            LogLevel.WARN,
-            `Bloks field in component '${parentComponentName}' has an empty component_whitelist. Defaulting to 'z.any()'.`
-          );
-          return "z.any()";
-        }
-
-        return kebabToCamelCase(value.component_whitelist[0]) + "Schema";
-      }
-      const whitelistedComponents = value.component_whitelist
-        .map((comp) => kebabToCamelCase(comp) + "Schema")
-        .join(", ");
-      return `z.union([${whitelistedComponents}])`;
-    } else {
-      return "z.any()"; // No whitelist means any component is allowed
-    }
-  } else if (storyblokType === "multilink") {
-    return "storyblokMultilinkSchema";
-  } else if (storyblokType === "option") {
-    return "z.union([z.number(), z.string()])";
-  } else if (storyblokType === "options") {
-    return "z.array(z.union([z.number(), z.string()]))";
-  } else if (storyblokType === "asset") {
-    return "storyblokAssetSchema";
-  } else if (storyblokType === "richtext") {
-    return "storyblokRichtextSchema";
+/**
+ * Handles the conversion of 'bloks' type fields with proper validation
+ */
+function handleBloksType(value: Components.ComponentSchemaField, parentComponentName: string): string {
+  if (!Array.isArray(value.component_whitelist)) {
+    Tracer.log(
+      LogLevel.WARN,
+      `Bloks field in component '${parentComponentName}' has no component_whitelist or invalid format. Defaulting to 'z.any()'.`
+    );
+    return "z.any()";
   }
 
-  return `z.${storyblokType}()`;
+  if (value.component_whitelist.length === 0) {
+    return "z.any()"; // No whitelist means any component is allowed
+  }
+
+  // Validate that all whitelisted components exist
+  const validComponents: string[] = [];
+
+  for (const componentName of value.component_whitelist) {
+    if (!componentName || typeof componentName !== "string") {
+      Tracer.log(
+        LogLevel.WARN,
+        `Invalid component name in whitelist for '${parentComponentName}': ${JSON.stringify(componentName)}`
+      );
+      continue;
+    }
+
+    if (!ConvertedComponents.has(componentName)) {
+      Tracer.log(
+        LogLevel.WARN,
+        `Nested component '${componentName}' used in '${parentComponentName}' has not been converted yet.`
+      );
+      return "z.any()"; // Fallback to z.any() if nested component is not converted
+    }
+
+    validComponents.push(componentName);
+  }
+
+  if (validComponents.length === 0) {
+    return "z.any()";
+  }
+
+  if (validComponents.length === 1) {
+    const componentName = validComponents[0];
+    if (!componentName) {
+      return "z.any()";
+    }
+    return kebabToCamelCase(componentName) + "Schema";
+  }
+
+  const whitelistedComponents = validComponents.map((comp) => kebabToCamelCase(comp) + "Schema").join(", ");
+  return `z.union([${whitelistedComponents}])`;
 }
