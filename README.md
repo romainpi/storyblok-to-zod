@@ -6,6 +6,21 @@ Processes the output of Storyblok's CLI `components pull` and `types generate` c
 
 Useful for defining Zod schemas for [Astro's Content Collections][astro-collections].
 
+## Options
+
+| Option    | Short | Description                                            | Default                      |
+| --------- | ----- | ------------------------------------------------------ | ---------------------------- |
+| --space   | -s    | (Required) The ID of your Storyblok space              | -                            |
+| --output  | -o    | Output to file                                         | -                            |
+| --folder  | -f    | Path to the folder containing the Storyblok components | '.storyblok'                 |
+| --verbose | -v    | Verbose mode                                           | false                        |
+| --debug   | -d    | Show debug information                                 | false                        |
+| --help    | -h    | Show command help                                      | false                        |
+
+## Notes
+
+Currently using [`ts-to-zod`] version `^3.15.0` because Astro hasn't updated to Zod v4 yet.
+
 ## Usage
 
 ### With installation
@@ -45,21 +60,6 @@ pnpm dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
 # With yarn
 yarn dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
 ```
-
-## Options
-
-| Option    | Short | Description                                            | Default                      |
-| --------- | ----- | ------------------------------------------------------ | ---------------------------- |
-| --space   | -s    | (Required) The ID of your Storyblok space              | -                            |
-| --output  | -o    | Output to file                                         | -                            |
-| --folder  | -f    | Path to the folder containing the Storyblok components | '.storyblok'                 |
-| --verbose | -v    | Verbose mode                                           | false                        |
-| --debug   | -d    | Show debug information                                 | false                        |
-| --help    | -h    | Show command help                                      | false                        |
-
-## Notes
-
-Currently using [`ts-to-zod`] version `^3.15.0` because Astro hasn't updated to Zod v4 yet.
 
 ## TODO
 
