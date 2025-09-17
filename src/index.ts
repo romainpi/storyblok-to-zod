@@ -30,43 +30,67 @@ program
 
 program.parse(process.argv);
 
-const rawOptions = program.opts();
-const options = validateCLIOptions(rawOptions);
+/**
+ * Main execution function with comprehensive error handling
+ */
+async function main(): Promise<void> {
+  try {
+    const rawOptions = program.opts();
+    const options = validateCLIOptions(rawOptions);
 
-const logLevel = options.debug ? LogLevel.DEBUG : options.verbose ? LogLevel.VERBOSE : LogLevel.INFO;
-Tracer.logLevel = logLevel;
+    const logLevel = options.debug ? LogLevel.DEBUG : options.verbose ? LogLevel.VERBOSE : LogLevel.INFO;
+    Tracer.logLevel = logLevel;
 
-if (logLevel >= LogLevel.VERBOSE) {
-  Tracer.log(LogLevel.VERBOSE, `Log level set to ${LogLevel[logLevel]}`);
+    if (logLevel >= LogLevel.VERBOSE) {
+      Tracer.log(LogLevel.VERBOSE, `Log level set to ${LogLevel[logLevel]}`);
+    }
+
+    Tracer.log(LogLevel.VERBOSE, `Starting conversion for space: ${options.space}`);
+    Tracer.log(LogLevel.DEBUG, `Options: ${JSON.stringify(options, null, 2)}`);
+
+    // Validate all required paths
+    await validatePaths(options);
+
+    // Initialize paths
+    const folderPath = path.resolve(options.folder);
+    const jsonPath = path.join(folderPath, "components", options.space);
+    const pathToSbInterfaceFile = path.join(folderPath, "types", CONSTANTS.SB_INTERFACES_FILE);
+
+    Tracer.log(
+      LogLevel.DEBUG,
+      `Resolved paths - folder: ${folderPath}, json: ${jsonPath}, types: ${pathToSbInterfaceFile}`
+    );
+
+    // Process Storyblok interface file
+    const schemaRegistry = await processStoryblokInterfaces(pathToSbInterfaceFile);
+
+    // Process component files
+    const componentFiles = await discoverComponentFiles(jsonPath);
+
+    if (componentFiles.length === 0) {
+      Tracer.log(LogLevel.WARN, `No component files found in ${jsonPath}`);
+      return;
+    }
+
+    Tracer.log(LogLevel.VERBOSE, `Found ${componentFiles.length} component JSON files.`);
+
+    // Build dependency graph and sort components
+    const sortedComponents = await buildDependencyGraph(componentFiles, jsonPath);
+
+    // Convert components
+    await convertComponents(sortedComponents, jsonPath);
+
+    // Generate final output
+    await generateFinalOutput(schemaRegistry, options.output);
+
+    console.log(
+      chalk.green("Zod definitions generated successfully at"),
+      chalk.underline(path.resolve(options.output))
+    );
+  } catch (error) {
+    await handleError(error);
+  }
 }
-
-// Validate all required paths
-await validatePaths(options);
-
-// Initialize paths
-const folderPath = path.resolve(options.folder);
-const jsonPath = path.join(folderPath, "components", options.space);
-const pathToSbInterfaceFile = path.join(folderPath, "types", CONSTANTS.SB_INTERFACES_FILE);
-
-Tracer.log(
-  LogLevel.DEBUG,
-  `Resolved paths - folder: ${folderPath}, json: ${jsonPath}, types: ${pathToSbInterfaceFile}`
-);
-
-// Process Storyblok interface file
-const schemaRegistry = await processStoryblokInterfaces(pathToSbInterfaceFile);
-
-// Process component files
-const componentFiles = await discoverComponentFiles(jsonPath);
-
-if (componentFiles.length === 0) {
-  Tracer.log(LogLevel.WARN, `No component files found in ${jsonPath}`);
-}
-
-Tracer.log(LogLevel.VERBOSE, `Found ${componentFiles.length} component JSON files in folder '${jsonPath}'.`);
-
-// Build dependency graph and sort components
-const sortedComponents = await buildDependencyGraph(componentFiles, jsonPath);
 
 /**
  * Process Storyblok interface definitions
@@ -240,13 +264,36 @@ function performTopologicalSort(componentDependencies: Map<string, string[]>): s
   }
 }
 
-// Convert components
-await convertComponents(sortedComponents, jsonPath);
+/**
+ * Centralized error handling
+ */
+async function handleError(error: unknown): Promise<void> {
+  if (error instanceof ValidationError) {
+    console.error(chalk.red("❌ Validation Error:"), error.message);
+    if (error.context) {
+      console.error(chalk.gray("Context:"), JSON.stringify(error.context, null, 2));
+    }
+    process.exit(1);
+  }
 
-// Generate final output
-await generateFinalOutput(schemaRegistry, options.output);
+  if (error instanceof FileOperationError) {
+    console.error(chalk.red("❌ File Operation Error:"), error.message);
+    console.error(chalk.gray("File:"), error.filePath);
+    console.error(chalk.gray("Operation:"), error.operation);
+    process.exit(1);
+  }
 
-console.log(chalk.green("Zod definitions generated successfully at"), chalk.underline(path.resolve(options.output)));
+  if (error instanceof Error) {
+    console.error(chalk.red("❌ Unexpected Error:"), error.message);
+    if (Tracer.logLevel >= LogLevel.DEBUG && error.stack) {
+      console.error(chalk.gray("Stack:"), error.stack);
+    }
+    process.exit(1);
+  }
+
+  console.error(chalk.red("❌ Unknown Error:"), String(error));
+  process.exit(1);
+}
 
 /**
  * Convert all components to Zod schemas
@@ -274,6 +321,9 @@ async function convertComponents(sortedComponents: string[], jsonPath: string): 
   Tracer.log(LogLevel.VERBOSE, `Successfully converted ${convertedCount} components`);
 }
 
+/**
+ * Generate the final output file
+ */
 async function generateFinalOutput(schemaRegistry: Map<string, string>, outputPath: string): Promise<void> {
   try {
     const allNativeSchemas = Array.from(schemaRegistry.values()).join("\n");
@@ -290,3 +340,6 @@ async function generateFinalOutput(schemaRegistry: Map<string, string>, outputPa
     throw new Error(`Failed to generate final output: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }
+
+// Execute main function
+main().catch(handleError);
