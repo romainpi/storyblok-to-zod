@@ -89,10 +89,10 @@ export default function extractSbInterfaceToZod(typeName: string, sbTypesFileCon
     const cleanedSchema = lines.slice(2).join("\n").trim();
 
     if (!cleanedSchema) {
-      throw new ValidationError(`Cleaned Zod schema for '${typeName}' is empty`, { typeName });
+      Tracer.log(LogLevel.WARN, `Interface '${typeName}' results in an empty Zod definition`);
+    } else {
+      Tracer.log(LogLevel.DEBUG, `Successfully generated Zod schema for '${typeName}'`, "extractSbInterfaceToZod");
     }
-
-    Tracer.log(LogLevel.DEBUG, `Successfully generated Zod schema for '${typeName}'`, "extractSbInterfaceToZod");
 
     return cleanedSchema;
   } catch (error) {

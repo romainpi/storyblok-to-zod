@@ -130,10 +130,7 @@ export function validateComponentData(data: unknown, componentName: string): Com
   }
 
   if (Object.keys(validatedSchema).length === 0) {
-    throw new ValidationError(`No valid fields found in component '${componentName}'`, {
-      componentName,
-      originalFieldCount: Object.keys(schema).length,
-    });
+    Tracer.log(LogLevel.WARN, `Component '${componentName}' has an empty schema`);
   }
 
   return { schema: validatedSchema };
