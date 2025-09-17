@@ -49,6 +49,12 @@ export default async function convertComponentJsonToZod(
 
     const jsonData = await safeReadJsonFile(inputFilePath, (data) => validateComponentData(data, componentName));
 
+    Tracer.log(
+      LogLevel.DEBUG,
+      `Loaded and validated JSON for component '${componentName}.json'`,
+      "convertComponentJsonToZod"
+    );
+
     // Format the component name to camelCase and add 'Schema' suffix
     const componentNameCamel = kebabToCamelCase(componentName) + "Schema";
     let outputContent = `export const ${componentNameCamel} = z.object({\n`;
