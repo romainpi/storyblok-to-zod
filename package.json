@@ -12,6 +12,10 @@
     "url": "https://github.com/romainpi/storyblok-to-zod.git",
     "branch": "main"
   },
+  "homepage": "https://github.com/romainpi/storyblok-to-zod#readme",
+  "bugs": {
+    "url": "https://github.com/romainpi/storyblok-to-zod/issues"
+  },
   "bin": {
     "storyblok-to-zod": "./dist/index.mjs"
   },
