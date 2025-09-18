@@ -30,7 +30,7 @@
   ],
   "author": "Romain Pironneau",
   "license": "MIT",
-  "packageManager": "pnpm@10.16.1",
+  "packageManager": "pnpm@10.17.0+sha256.bd9ec5417641391e0acb3912b2912bd5b0385407a82da94744a7407b567fdb4f",
   "devDependencies": {
     "@types/node": "^24.5.1",
     "typescript": "^5.9.2",
