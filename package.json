@@ -22,8 +22,9 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "pnpm run clean && node esbuild.config.mjs && tsc --emitDeclarationOnly",
-    "prepack": "pnpm run clean && node esbuild.config.mjs && tsc --emitDeclarationOnly",
     "dev": "pnpm run build && node dist/index.js",
+    "lint:markdown": "markdownlint-cli2 \"**/*.{md,mdx}\" \"!node_modules\"",
+    "prepack": "pnpm run clean && node esbuild.config.mjs && tsc --emitDeclarationOnly",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -36,8 +37,11 @@
   "license": "MIT",
   "packageManager": "pnpm@10.17.0+sha256.bd9ec5417641391e0acb3912b2912bd5b0385407a82da94744a7407b567fdb4f",
   "devDependencies": {
+    "@github/markdownlint-github": "0.8.0",
     "@types/node": "24.5.2",
     "esbuild": "0.25.10",
+    "markdownlint-cli2": "0.18.1",
+    "markdownlint-cli2-formatter-pretty": "0.0.8",
     "typescript": "5.9.2"
   },
   "dependencies": {
