@@ -1,16 +1,18 @@
 # storyblok-to-zod
 
-Generates a [Zod schema][zod] from your Storyblok components.
+![CLI](https://img.shields.io/badge/CLI-grey?logo=npm)
+[![License](https://img.shields.io/npm/l/storyblok-to-zod?label=license&color=blue)](https://github.com/romainpi/storyblok-to-zod/blob/main/LICENSE.txt)
+[![Version](https://img.shields.io/npm/v/storyblok-to-zod?logo=npm)](https://npmjs.org/package/storyblok-to-zod)
+![Maturity](https://img.shields.io/github/created-at/romainpi/storyblok-to-zod?label=born)
 
-Processes the output of [Storyblok's CLI][storyblok-cli] `components pull` and
-`types generate` commands.
+Generates clean, optimized [Zod schemas][zod] from your Storyblok components by processing the output of [Storyblok's
+CLI][storyblok-cli] `components pull` and `types generate` commands. Unused schemas are automatically excluded for a
+smaller, easier-to-maintain result.
 
-Useful for defining Zod schemas for [Astro's Content
-Collections][astro-collections].
+Useful for [defining Zod schemas in Astro's Content Collections][astro-collection-schema].
 
-Converting Storyblok's CLI output to Zod schemas with [`ts-to-zod`] can be
-problematic. This tool helps with this process by generating compatible Zod
-schemas directly from your Storyblok components.
+Automatically converting Storyblok's CLI output to Zod schemas with tools like [`ts-to-zod`] can be problematic. This
+tool helps this process by generating compatible Zod schemas directly from your Storyblok components.
 
 ## Prerequisites
 
@@ -138,6 +140,25 @@ disable this behaviour by specifying `--no-extends-array`.
 
 Feedback and contributions are welcome! If you run into a problem, don't hesitate to [open a GitHub issue][new-issue].
 
+## Changelog
+
+### v0.1.0
+
+- Cleaner Zod schema output:
+  - Deduplicated imports moved to the top
+  - Better formatting and organization
+  - Enhanced readability
+
+- Schema dependency analyzer:
+  - Analyzes component schemas to determine which native schemas are actually used
+  - Excludes unused schemas from output for cleaner results
+  - Handles indirect dependencies between native schemas
+  - Provides detailed usage statistics
+
+### v0.0.12
+
+- **Fix**: Tool now works correctly when output is piped to other commands
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -150,7 +171,7 @@ MIT - see [LICENSE.txt](LICENSE.txt) for details.
 
 - [ ] Add Storyblok datasources as well.
 
-[astro-collections]: https://docs.astro.build/en/guides/content-collections/
+[astro-collection-schema]: https://docs.astro.build/en/guides/content-collections/#defining-the-collection-schema
 [`ts-to-zod`]: https://www.npmjs.com/package/ts-to-zod
 [storyblok-cli]: https://www.storyblok.com/docs/packages/storyblok-cli
 [zod]: https://zod.dev
