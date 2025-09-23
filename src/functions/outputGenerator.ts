@@ -26,8 +26,10 @@ export async function generateFinalOutput(schemaRegistry: Map<string, string>, o
         chalk.green("Zod definitions generated successfully at ") + chalk.underline(path.resolve(outputPath))
       );
     } else {
-      console.log();
-      console.log(finalContent);
+      // Remove final newline so it doesn't spoil the output when piping
+      const finalOutput = finalContent.trimEnd();
+
+      console.log(finalOutput);
     }
   } catch (error) {
     throw new Error(`Failed to generate final output: ${error instanceof Error ? error.message : "Unknown error"}`);

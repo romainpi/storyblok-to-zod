@@ -34,7 +34,12 @@ export class Tracer {
         }
       };
 
-      console.log(`${levelText()}${stringToShow}`);
+      if (level === LogLevel.ERROR) {
+        console.error(`${levelText()}${stringToShow}`);
+      } else {
+        // We always use warn for non-error logs to ensure debug and verbose visibility even when piped
+        console.warn(`${levelText()}${stringToShow}`);
+      }
     }
   }
 }
