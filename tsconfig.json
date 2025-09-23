@@ -2,8 +2,8 @@
   "compilerOptions": {
     // Target & Module Settings
     "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "lib": ["ES2022"],
 
     // File Layout
