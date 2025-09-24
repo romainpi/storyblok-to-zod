@@ -25,7 +25,11 @@
     "dev": "pnpm run build && node dist/index.js",
     "lint:markdown": "markdownlint-cli2 \"**/*.{md,mdx}\" \"!node_modules\"",
     "prepack": "pnpm run clean && node esbuild.config.mjs && tsc --emitDeclarationOnly",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch"
   },
   "keywords": [
     "storyblok",
@@ -39,12 +43,16 @@
   "packageManager": "pnpm@10.17.1+sha256.a1e0133f6801c13039ae41309e5e5a7d1058a3a1e1edd020a4944a83c5368d04",
   "devDependencies": {
     "@github/markdownlint-github": "0.8.0",
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "24.5.2",
+    "@vitest/ui": "^3.2.4",
     "esbuild": "0.25.10",
+    "fs-extra": "^11.3.2",
     "markdownlint-cli2": "0.18.1",
     "markdownlint-cli2-formatter-pretty": "0.0.8",
     "storyblok-js-client": "^7.1.4",
     "typescript": "5.9.2",
+    "vitest": "^3.2.4",
     "zod": "3.25.76"
   },
   "dependencies": {

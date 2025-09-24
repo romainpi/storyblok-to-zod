@@ -1,0 +1,60 @@
+{
+  "name": "text-block",
+  "display_name": "Text Block",
+  "description": "Rich text content block",
+  "created_at": "2024-01-12T08:45:20.234Z",
+  "updated_at": "2024-01-22T10:30:40.567Z",
+  "id": 1004,
+  "schema": {
+    "content": {
+      "type": "richtext",
+      "pos": 0,
+      "id": "content-richtext-id",
+      "description": "Rich text content"
+    },
+    "alignment": {
+      "type": "option",
+      "pos": 1,
+      "options": [
+        {
+          "_uid": "align-left",
+          "name": "Left",
+          "value": "left"
+        },
+        {
+          "_uid": "align-center",
+          "name": "Center",
+          "value": "center"
+        },
+        {
+          "_uid": "align-right",
+          "name": "Right",
+          "value": "right"
+        }
+      ],
+      "id": "alignment-id",
+      "default_value": "left"
+    },
+    "background_color": {
+      "type": "text",
+      "pos": 2,
+      "id": "bg-color-id",
+      "description": "Hex color code for background"
+    }
+  },
+  "image": null,
+  "preview_field": null,
+  "is_root": false,
+  "preview_tmpl": "Text Block",
+  "is_nestable": true,
+  "all_presets": [],
+  "preset_id": null,
+  "real_name": "text-block",
+  "component_group_uuid": null,
+  "color": "#6b7280",
+  "icon": "block-text",
+  "internal_tags_list": [],
+  "internal_tag_ids": [],
+  "content_type_asset_preview": null,
+  "metadata": {}
+}
