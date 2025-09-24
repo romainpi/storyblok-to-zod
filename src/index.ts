@@ -53,7 +53,7 @@ async function main(): Promise<void> {
     );
 
     // Process Storyblok interface file
-    const schemaRegistry = await processStoryblokInterfaces(pathToSbInterfaceFile, options);
+    await processStoryblokInterfaces(pathToSbInterfaceFile, options);
 
     // Process component files
     const componentFiles = await discoverComponentFiles(jsonPath);
@@ -72,7 +72,7 @@ async function main(): Promise<void> {
     await convertComponents(sortedComponents, jsonPath);
 
     // Generate final output
-    await generateFinalOutput(schemaRegistry, options.output);
+    await generateFinalOutput(options.output);
   } catch (error) {
     await handleError(error);
   }

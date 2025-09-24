@@ -1,6 +1,7 @@
 import path from "path";
 import { LogLevel, Tracer } from "../statics/Tracer";
 import { ConvertedComponents } from "../statics/ConvertedComponents";
+import { NativeSchemaRegistry } from "../statics/NativeSchemaRegistry";
 import { safeWriteFile } from "../utils";
 import * as CONSTANTS from "../constants";
 import chalk from "chalk";
@@ -8,9 +9,9 @@ import chalk from "chalk";
 /**
  * Generate the final output file
  */
-export async function generateFinalOutput(schemaRegistry: Map<string, string>, outputPath?: string): Promise<void> {
+export async function generateFinalOutput(outputPath?: string): Promise<void> {
   try {
-    const allNativeSchemas = Array.from(schemaRegistry.values()).join("\n");
+    const allNativeSchemas = NativeSchemaRegistry.getAllValues().join("\n");
     const allComponentSchemas = ConvertedComponents.getAllValues().join("\n");
 
     const finalContent = `${CONSTANTS.FILE_HEADER}\n${allNativeSchemas}\n${allComponentSchemas}`;

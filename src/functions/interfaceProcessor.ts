@@ -1,16 +1,14 @@
 import { Project } from "ts-morph";
 import { LogLevel, Tracer } from "../statics/Tracer";
+import { NativeSchemaRegistry } from "../statics/NativeSchemaRegistry";
 import extractSbInterfaceToZod from "./extractSbInterfaceToZod";
 import { CLIOptions, FileOperationError, ValidationError } from "../validation";
 
 /**
  * Process Storyblok interface definitions
  */
-export async function processStoryblokInterfaces(
-  pathToSbInterfaceFile: string,
-  options: CLIOptions
-): Promise<Map<string, string>> {
-  const schemaRegistry = new Map<string, string>();
+export async function processStoryblokInterfaces(pathToSbInterfaceFile: string, options: CLIOptions): Promise<void> {
+  // Directly use NativeSchemaRegistry for storing schemas
 
   try {
     Tracer.log(LogLevel.DEBUG, `Processing Storyblok interfaces from: ${pathToSbInterfaceFile}`);
@@ -21,7 +19,7 @@ export async function processStoryblokInterfaces(
 
     if (interfaces.length === 0) {
       Tracer.log(LogLevel.WARN, "No interfaces found in Storyblok types file");
-      return schemaRegistry;
+      return;
     }
 
     for (const currentInterface of interfaces) {
@@ -29,7 +27,7 @@ export async function processStoryblokInterfaces(
 
       try {
         const schema = extractSbInterfaceToZod(currentInterface, options);
-        schemaRegistry.set(interfaceName, schema);
+        NativeSchemaRegistry.set(interfaceName, schema);
         Tracer.log(LogLevel.DEBUG, `Processed interface: ${interfaceName}`);
       } catch (error) {
         Tracer.log(
@@ -39,8 +37,7 @@ export async function processStoryblokInterfaces(
       }
     }
 
-    Tracer.log(LogLevel.VERBOSE, `Processed ${schemaRegistry.size} interfaces`);
-    return schemaRegistry;
+    Tracer.log(LogLevel.VERBOSE, `Processed ${NativeSchemaRegistry.getAll().size} interfaces`);
   } catch (error) {
     if (error instanceof ValidationError || error instanceof FileOperationError) {
       throw error;
