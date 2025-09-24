@@ -1,6 +1,6 @@
 {
   "name": "storyblok-to-zod",
-  "version": "0.0.12",
+  "version": "0.1.0",
   "description": "Generates a Zod schema from your Storyblok components.",
   "main": "./dist/index.js",
   "files": [
