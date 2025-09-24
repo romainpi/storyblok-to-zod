@@ -5,6 +5,7 @@ import { NativeSchemaRegistry } from "../statics/NativeSchemaRegistry";
 import { safeWriteFile } from "../utils";
 import * as CONSTANTS from "../constants";
 import chalk from "chalk";
+import { formatFinalOutput } from "./outputFormatter";
 
 /**
  * Generate the final output file
@@ -14,10 +15,15 @@ export async function generateFinalOutput(outputPath?: string): Promise<void> {
     const allNativeSchemas = NativeSchemaRegistry.getAllValues().join("\n");
     const allComponentSchemas = ConvertedComponents.getAllValues().join("\n");
 
-    const finalContent = `${CONSTANTS.FILE_HEADER}\n${allNativeSchemas}\n${allComponentSchemas}`;
+    // Use the new formatter for better organization and formatting
+    const formattedContent = formatFinalOutput(
+      CONSTANTS.FILE_HEADER,
+      allNativeSchemas,
+      allComponentSchemas
+    );
 
     if (outputPath) {
-      await safeWriteFile(outputPath, finalContent);
+      await safeWriteFile(outputPath, formattedContent);
       Tracer.log(LogLevel.DEBUG, `Final output written to: ${path.resolve(outputPath)}`);
 
       Tracer.log(
@@ -26,7 +32,7 @@ export async function generateFinalOutput(outputPath?: string): Promise<void> {
       );
     } else {
       // Remove final newline so it doesn't spoil the output when piping
-      const finalOutput = finalContent.trimEnd();
+      const finalOutput = formattedContent.trimEnd();
 
       console.log(finalOutput);
     }

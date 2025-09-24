@@ -35,7 +35,7 @@
   ],
   "author": "Romain Pironneau",
   "license": "MIT",
-  "packageManager": "pnpm@10.17.0+sha256.bd9ec5417641391e0acb3912b2912bd5b0385407a82da94744a7407b567fdb4f",
+  "packageManager": "pnpm@10.17.1+sha256.a1e0133f6801c13039ae41309e5e5a7d1058a3a1e1edd020a4944a83c5368d04",
   "devDependencies": {
     "@github/markdownlint-github": "0.8.0",
     "@types/node": "24.5.2",
