@@ -13,4 +13,8 @@ export class ConvertedComponents {
   public static getAll(): [string, string][] {
     return Array.from(this.convertedComponents.entries());
   }
+
+  public static getAllValues(): string[] {
+    return Array.from(this.convertedComponents.values());
+  }
 }

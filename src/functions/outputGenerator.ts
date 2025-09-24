@@ -11,9 +11,7 @@ import chalk from "chalk";
 export async function generateFinalOutput(schemaRegistry: Map<string, string>, outputPath?: string): Promise<void> {
   try {
     const allNativeSchemas = Array.from(schemaRegistry.values()).join("\n");
-    const allComponentSchemas = Array.from(ConvertedComponents.getAll())
-      .map((result) => result[1])
-      .join("\n");
+    const allComponentSchemas = ConvertedComponents.getAllValues().join("\n");
 
     const finalContent = `${CONSTANTS.FILE_HEADER}\n${allNativeSchemas}\n${allComponentSchemas}`;
 
