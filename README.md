@@ -34,60 +34,96 @@ This will create the necessary `.storyblok/` folder structure that this tool pro
 
 ## Usage
 
-### Without installation
+<details open>
+  <summary>
+    <h3>Without installation</h3><br/>
+    You can run <code>storyblok-to-zod</code> directly with your flavor of javascript package manager ...
+  </summary>
+  <br/>
+  <details open>
+  <summary>pnpm</summary>
 
-```sh
-# With npm
-npx storyblok-to-zod --space STORYBLOK_SPACE_ID
-```
+  ```sh
+  # Using latest version:
+  pnpx storyblok-to-zod@latest --space STORYBLOK_SPACE_ID
 
-<details>
-<summary>With pnpm</summary>
+  # Or using specific version:
+  pnpx storyblok-to-zod@MAJOR.MINOR.PATCH --space STORYBLOK_SPACE_ID
+  ```
+  </details>
+  <details>
+  <summary>npm</summary>
 
-```sh
-# With pnpm
-pnpm dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
-```
+  ```sh
+  # Using latest version:
+  npx storyblok-to-zod@latest --space STORYBLOK_SPACE_ID
+  
+  # Or using specific version:
+  npx storyblok-to-zod@MAJOR.MINOR.PATCH --space STORYBLOK_SPACE_ID
+  ```
+  </details>
+  <details>
+  <summary>yarn</summary>
 
+  ```sh
+  yarn dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
+  ```
+  </details>
 </details>
 
 <details>
-<summary>With yarn</summary>
+  <summary>
+    <h3>With installation</h3><br/>
+    ... or you can add it to your project's dev dependencies and then run it.
+  </summary>
 
-```sh
-# With yarn
-yarn dlx storyblok-to-zod --space STORYBLOK_SPACE_ID
-```
+  #### Installing
+
+  <details open>
+    <summary>pnpm</summary>
+
+  ```sh
+  pnpm add storyblok-to-zod --dev
+  ```
+  </details>
+  <details>
+  <summary>npm</summary>
+
+  ```sh
+  npm install storyblok-to-zod --save-dev
+  ```
+  </details>
+  <details>
+  <summary>yarn</summary>
+
+  ```sh
+  yarn add storyblok-to-zod --dev
+  ```
+
+  </details>
+
+  #### Running
+
+
+  <details open>
+  <summary>pnpm</summary>
+
+  ```sh
+  pnpm storyblok-to-zod --space STORYBLOK_SPACE_ID
+  ```
+  </details>
+  <details>
+  <summary>yarn</summary>
+
+  ```sh
+  yarn storyblok-to-zod --space STORYBLOK_SPACE_ID
+  ```
+  </details>
+
+
 
 </details>
 
-### With installation
-
-<details>
-<summary>Installing</summary>
-
-```sh
-# With npm
-npm install storyblok-to-zod --save-dev
-
-# With pnpm
-pnpm add storyblok-to-zod --dev
-
-# With yarn
-yarn add storyblok-to-zod --dev
-```
-
-</details>
-
-Running:
-
-```sh
-# With pnpm
-pnpm storyblok-to-zod --space STORYBLOK_SPACE_ID
-
-# With yarn
-yarn storyblok-to-zod --space STORYBLOK_SPACE_ID
-```
 
 ## Example Output
 
