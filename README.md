@@ -1,9 +1,9 @@
 # storyblok-to-zod
 
-![CLI](https://img.shields.io/badge/CLI-grey?logo=npm)
+![CLI](https://img.shields.io/badge/CLI-forestgreen?logo=npm)
 [![License](https://img.shields.io/npm/l/storyblok-to-zod?label=license&color=blue)](https://github.com/romainpi/storyblok-to-zod/blob/main/LICENSE.txt)
 [![Version](https://img.shields.io/npm/v/storyblok-to-zod?logo=npm)](https://npmjs.org/package/storyblok-to-zod)
-![Maturity](https://img.shields.io/github/created-at/romainpi/storyblok-to-zod?label=born)
+![Maturity](https://img.shields.io/github/created-at/romainpi/storyblok-to-zod?label=born&color=hotpink)
 
 Generates clean, optimized [Zod schemas][zod] from your Storyblok components by processing the output of [Storyblok's
 CLI][storyblok-cli] `components pull` and `types generate` commands. Unused schemas are automatically excluded for a
@@ -140,6 +140,51 @@ export const heroSectionSchema = z.object({
 });
 ```
 
+## ISbStoryData Schema Extraction
+
+In addition to converting your custom Storyblok components, this tool can extract and convert Storyblok's built-in `ISbStoryData` interface from the `storyblok-js-client` package to a comprehensive Zod schema.
+
+### Features
+
+- **Automatic Interface Discovery**: Finds `ISbStoryData` in your `node_modules` using ts-morph
+- **Generic Type Handling**: Automatically removes generic type parameters that ts-to-zod can't handle
+- **Complete Type Mapping**: Converts all 39+ properties with proper Zod validation
+- **Self-Referencing Support**: Handles recursive types like the `parent` property using `z.lazy()`
+- **Dependency Resolution**: Creates type stubs for interface dependencies
+
+### Usage Examples
+
+#### Export to File
+```sh
+# Export schema to a specific file
+pnpx storyblok-to-zod --space YOUR_SPACE_ID --export-isb ./src/schemas/ISbStoryData.schema.ts
+
+# Export complete bundle with multiple formats
+pnpx storyblok-to-zod --space YOUR_SPACE_ID --export-isb-bundle ./src/schemas
+```
+
+### Generated Schema Structure
+
+The ISbStoryData schema includes validation for:
+
+- **Story Metadata**: `id`, `uuid`, `name`, `slug`, `full_slug`
+- **Content Management**: `content`, `published`, `created_at`, `updated_at`  
+- **Localization**: `lang`, `translated_slugs`, `localized_paths`
+- **Relationships**: `parent`, `alternates`, `breadcrumbs`
+- **Publishing**: `published_at`, `first_published_at`, `scheduled_date`
+- **Complex Types**: Union types, nested objects, optional and nullable fields
+
+### Bundle Export
+
+The `--export-isb-bundle` option creates multiple files:
+
+```
+schemas/
+├── ISbStoryData.schema.ts        # Standalone schema with Zod import
+├── ISbStoryData.schema.module.ts # Schema without imports (for modules)
+└── ISbStoryData.types.ts         # TypeScript type definitions
+```
+
 ## Options
 
 | Option              | Short | Description                                            | Default                      |
@@ -151,6 +196,8 @@ export const heroSectionSchema = z.object({
 | --debug             | -d    | Show debug information                                 | false                        |
 | --help              | -h    | Show command help                                      | false                        |
 | --no-extends-array  |       | Will not automatically convert `StoryblokMultiasset`   | -                            |
+| --export-isb        |       | Export ISbStoryData schema to specified file path     | -                            |
+| --export-isb-bundle |       | Export ISbStoryData schema bundle to directory        | './schemas'                  |
 
 ## Features
 
@@ -160,6 +207,7 @@ export const heroSectionSchema = z.object({
 - ✅ Supports all major Storyblok field types
 - ✅ Compatible with Astro's Content Collections
 - ✅ Comprehensive error handling and validation
+- ✅ Extracts and converts ISbStoryData interface from storyblok-js-client
 
 ## Notes
 

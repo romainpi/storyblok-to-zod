@@ -9,6 +9,12 @@ import { NativeSchemaRegistry } from "../statics/NativeSchemaRegistry";
 export function analyzeNativeSchemaDependencies(): void {
   Tracer.log(LogLevel.DEBUG, "Starting native schema dependency analysis", "analyzeNativeSchemaDependencies");
 
+  // Always mark ISbStoryData as used since it's a core Storyblok schema
+  if (NativeSchemaRegistry.has("ISbStoryData")) {
+    NativeSchemaRegistry.markAsUsed("ISbStoryData");
+    Tracer.log(LogLevel.DEBUG, `ISbStoryData schema marked as used (core Storyblok schema)`);
+  }
+
   // Create a ts-morph project to analyze the generated schemas
   const project = new Project({
     useInMemoryFileSystem: true,
