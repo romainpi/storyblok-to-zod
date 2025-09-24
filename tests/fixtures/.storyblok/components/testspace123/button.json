@@ -1,0 +1,85 @@
+{
+  "name": "button",
+  "display_name": "Button Component",
+  "description": "Interactive button element",
+  "created_at": "2024-01-10T09:15:30.789Z",
+  "updated_at": "2024-01-18T16:45:22.012Z",
+  "id": 1002,
+  "schema": {
+    "label": {
+      "type": "text",
+      "pos": 0,
+      "id": "label-field-id",
+      "description": "Button text label",
+      "tooltip": true
+    },
+    "url": {
+      "type": "multilink",
+      "pos": 1,
+      "id": "url-field-id",
+      "description": "Button destination URL"
+    },
+    "style": {
+      "type": "option",
+      "pos": 2,
+      "use_uuid": false,
+      "options": [
+        {
+          "_uid": "style-primary",
+          "name": "Primary",
+          "value": "primary"
+        },
+        {
+          "_uid": "style-secondary", 
+          "name": "Secondary",
+          "value": "secondary"
+        },
+        {
+          "_uid": "style-outline",
+          "name": "Outline",
+          "value": "outline"
+        }
+      ],
+      "id": "style-field-id",
+      "default_value": "primary"
+    },
+    "size": {
+      "type": "option",
+      "pos": 3,
+      "options": [
+        {
+          "_uid": "size-small",
+          "name": "Small",
+          "value": "sm"
+        },
+        {
+          "_uid": "size-medium",
+          "name": "Medium", 
+          "value": "md"
+        },
+        {
+          "_uid": "size-large",
+          "name": "Large",
+          "value": "lg"
+        }
+      ],
+      "id": "size-field-id",
+      "default_value": "md"
+    }
+  },
+  "image": null,
+  "preview_field": "label",
+  "is_root": false,
+  "preview_tmpl": "{{it.label}}",
+  "is_nestable": true,
+  "all_presets": [],
+  "preset_id": null,
+  "real_name": "button",
+  "component_group_uuid": null,
+  "color": "#3b82f6",
+  "icon": "block-button",
+  "internal_tags_list": [],
+  "internal_tag_ids": [],
+  "content_type_asset_preview": null,
+  "metadata": {}
+}

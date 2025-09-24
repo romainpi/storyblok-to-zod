@@ -1,0 +1,67 @@
+{
+  "name": "card",
+  "display_name": null,
+  "description": "A reusable card component for displaying content",
+  "created_at": "2024-01-15T10:30:45.123Z",
+  "updated_at": "2024-01-20T14:22:10.456Z",
+  "id": 1001,
+  "schema": {
+    "title": {
+      "type": "text",
+      "pos": 0,
+      "id": "title-field-id",
+      "description": "The main title of the card"
+    },
+    "description": {
+      "type": "textarea",
+      "pos": 1,
+      "id": "description-field-id",
+      "description": "Description text for the card"
+    },
+    "image": {
+      "type": "asset",
+      "pos": 2,
+      "id": "image-field-id"
+    },
+    "variant": {
+      "type": "option",
+      "pos": 3,
+      "use_uuid": true,
+      "exclude_empty_option": true,
+      "options": [
+        {
+          "_uid": "variant-uid-1",
+          "name": "Default",
+          "value": "default"
+        },
+        {
+          "_uid": "variant-uid-2",
+          "name": "Featured",
+          "value": "featured"
+        }
+      ],
+      "id": "variant-field-id",
+      "default_value": "default"
+    },
+    "show_button": {
+      "type": "boolean",
+      "pos": 4,
+      "id": "show-button-id"
+    }
+  },
+  "image": null,
+  "preview_field": null,
+  "is_root": false,
+  "preview_tmpl": "{{it.title}}",
+  "is_nestable": true,
+  "all_presets": [],
+  "preset_id": null,
+  "real_name": "card",
+  "component_group_uuid": null,
+  "color": null,
+  "icon": null,
+  "internal_tags_list": [],
+  "internal_tag_ids": [],
+  "content_type_asset_preview": null,
+  "metadata": {}
+}

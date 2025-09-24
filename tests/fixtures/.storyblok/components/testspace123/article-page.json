@@ -1,0 +1,82 @@
+{
+  "name": "article-page",
+  "display_name": "Article Page",
+  "description": "Main page template for articles",
+  "created_at": "2024-01-08T11:20:15.345Z",
+  "updated_at": "2024-01-25T13:10:55.678Z",
+  "id": 1003,
+  "schema": {
+    "seo_title": {
+      "type": "text",
+      "pos": 0,
+      "id": "seo-title-id",
+      "description": "SEO optimized title",
+      "tooltip": true
+    },
+    "seo_description": {
+      "type": "textarea",
+      "pos": 1,
+      "id": "seo-description-id",
+      "description": "Meta description for SEO"
+    },
+    "content_blocks": {
+      "type": "bloks",
+      "pos": 2,
+      "restrict_type": "",
+      "restrict_components": true,
+      "component_whitelist": [
+        "card",
+        "button",
+        "text-block"
+      ],
+      "id": "content-blocks-id"
+    },
+    "featured_image": {
+      "type": "asset",
+      "pos": 3,
+      "filetypes": ["images"],
+      "id": "featured-image-id"
+    },
+    "author": {
+      "type": "text",
+      "pos": 4,
+      "id": "author-id"
+    },
+    "published_date": {
+      "type": "datetime",
+      "pos": 5,
+      "id": "published-date-id"
+    },
+    "tags": {
+      "type": "multilink",
+      "pos": 6,
+      "id": "tags-id",
+      "description": "Article tags"
+    },
+    "seo_settings": {
+      "type": "section",
+      "pos": 7,
+      "keys": [
+        "seo_title",
+        "seo_description"
+      ],
+      "id": "seo-section-id",
+      "display_name": "SEO Settings"
+    }
+  },
+  "image": null,
+  "preview_field": "seo_title",
+  "is_root": true,
+  "preview_tmpl": "{{it.seo_title}}",
+  "is_nestable": false,
+  "all_presets": [],
+  "preset_id": null,
+  "real_name": "article-page",
+  "component_group_uuid": null,
+  "color": "#10b981",
+  "icon": "block-doc-text",
+  "internal_tags_list": [],
+  "internal_tag_ids": [],
+  "content_type_asset_preview": null,
+  "metadata": {}
+}
