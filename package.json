@@ -29,6 +29,7 @@
   },
   "keywords": [
     "storyblok",
+    "astro-component",
     "cli",
     "node",
     "javascript"
