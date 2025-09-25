@@ -154,13 +154,10 @@ In addition to converting your custom Storyblok components, this tool can extrac
 
 ### Usage Examples
 
-#### Export to File
+#### Basic Usage
 ```sh
-# Export schema to a specific file
-pnpx storyblok-to-zod --space YOUR_SPACE_ID --export-isb ./src/schemas/ISbStoryData.schema.ts
-
-# Export complete bundle with multiple formats
-pnpx storyblok-to-zod --space YOUR_SPACE_ID --export-isb-bundle ./src/schemas
+# Generate Zod schemas for your Storyblok components
+pnpx storyblok-to-zod --space YOUR_SPACE_ID --output ./schemas/storyblok.ts
 ```
 
 ### Generated Schema Structure
@@ -174,17 +171,6 @@ The ISbStoryData schema includes validation for:
 - **Publishing**: `published_at`, `first_published_at`, `scheduled_date`
 - **Complex Types**: Union types, nested objects, optional and nullable fields
 
-### Bundle Export
-
-The `--export-isb-bundle` option creates multiple files:
-
-```
-schemas/
-├── ISbStoryData.schema.ts        # Standalone schema with Zod import
-├── ISbStoryData.schema.module.ts # Schema without imports (for modules)
-└── ISbStoryData.types.ts         # TypeScript type definitions
-```
-
 ## Options
 
 | Option              | Short | Description                                            | Default                      |
@@ -196,8 +182,6 @@ schemas/
 | --debug             | -d    | Show debug information                                 | false                        |
 | --help              | -h    | Show command help                                      | false                        |
 | --no-extends-array  |       | Will not automatically convert `StoryblokMultiasset`   | -                            |
-| --export-isb        |       | Export ISbStoryData schema to specified file path     | -                            |
-| --export-isb-bundle |       | Export ISbStoryData schema bundle to directory        | './schemas'                  |
 
 ## Features
 
@@ -207,7 +191,6 @@ schemas/
 - ✅ Supports all major Storyblok field types
 - ✅ Compatible with Astro's Content Collections
 - ✅ Comprehensive error handling and validation
-- ✅ Extracts and converts ISbStoryData interface from storyblok-js-client
 
 ## Notes
 

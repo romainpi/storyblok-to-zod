@@ -7,7 +7,6 @@ import { processStoryblokInterfaces } from "./functions/interfaceProcessor";
 import { discoverComponentFiles, buildDependencyGraph, convertComponents } from "./functions/componentProcessor";
 import { generateFinalOutput } from "./functions/outputGenerator";
 import { handleError } from "./functions/errorHandler";
-import { exportISbStoryDataSchema, exportISbStoryDataSchemaBundle } from "./functions/isbStoryDataProcessor";
 
 const program = new Command();
 program
@@ -18,9 +17,7 @@ program
   .option("-f, --folder <folderPath>", "path to the folder containing Storyblok components", ".storyblok")
   .option("-v, --verbose", "show verbose information")
   .option("-d, --debug", "show debug information")
-  .option("--no-extends-array", "will not automatically convert StoryblokMultiasset's interface definition")
-  .option("--export-isb <outputPath>", "export ISbStoryData schema to specified file path")
-  .option("--export-isb-bundle [outputDir]", "export ISbStoryData schema bundle to directory (default: ./schemas)");
+  .option("--no-extends-array", "will not automatically convert StoryblokMultiasset's interface definition");
 
 program.parse(process.argv);
 
@@ -37,37 +34,6 @@ async function main(): Promise<void> {
 
     if (logLevel >= LogLevel.VERBOSE) {
       Tracer.log(LogLevel.VERBOSE, `Log level set to ${LogLevel[logLevel]}`);
-    }
-
-    // Export ISbStoryData schema to specified file if requested
-    if (rawOptions.exportIsb) {
-      console.log(`📤 Exporting ISbStoryData schema to: ${rawOptions.exportIsb}\n`);
-      
-      try {
-        exportISbStoryDataSchema(options, rawOptions.exportIsb);
-        console.log("✅ Successfully exported ISbStoryData schema");
-        
-      } catch (error) {
-        console.error("❌ Export failed:", error instanceof Error ? error.message : "Unknown error");
-      }
-      
-      return; // Exit after export
-    }
-
-    // Export ISbStoryData schema bundle if requested
-    if (rawOptions.exportIsbBundle !== undefined) {
-      const outputDir = rawOptions.exportIsbBundle || "./schemas";
-      console.log(`📦 Exporting ISbStoryData schema bundle to: ${outputDir}\n`);
-      
-      try {
-        exportISbStoryDataSchemaBundle(options, outputDir);
-        console.log("✅ Successfully exported ISbStoryData schema bundle");
-        
-      } catch (error) {
-        console.error("❌ Bundle export failed:", error instanceof Error ? error.message : "Unknown error");
-      }
-      
-      return; // Exit after bundle export
     }
 
     Tracer.log(LogLevel.VERBOSE, `Starting conversion for space: ${options.space}`);
