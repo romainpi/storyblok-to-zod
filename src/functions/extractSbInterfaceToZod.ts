@@ -21,7 +21,8 @@ import { pascalToCamelCase } from "../utils";
  */
 export default function extractSbInterfaceToZod(
   interfaceDeclaration: InterfaceDeclaration,
-  options: CLIOptions
+  options: CLIOptions,
+  fullSourceContent?: string
 ): string {
   const interfaceName = interfaceDeclaration.getName();
   Tracer.log(LogLevel.DEBUG, `Enter with interfaceName='${interfaceName}'`, "extractSbInterfaceToZod");
@@ -93,8 +94,13 @@ export default function extractSbInterfaceToZod(
     let zodSchema;
 
     try {
-      schemaGenerator = generate({ sourceText: interfaceDefinition });
-      zodSchema = schemaGenerator.getZodSchemasFile("~/types/storyblok.d");
+      // Use full source content if provided, otherwise fall back to interface definition
+      const sourceText = fullSourceContent || interfaceDefinition;
+      Tracer.log(LogLevel.DEBUG, `About to call ts-to-zod generate with source text length: ${sourceText.length}`, "extractSbInterfaceToZod");
+      schemaGenerator = generate({ sourceText });
+      // Use a dummy import path that we'll post-process later
+      zodSchema = schemaGenerator.getZodSchemasFile("PLACEHOLDER_IMPORT_PATH");
+      Tracer.log(LogLevel.DEBUG, `ts-to-zod generated schema length: ${zodSchema ? zodSchema.length : 0}`, "extractSbInterfaceToZod");
     } catch (error) {
       throw new Error(
         `Failed to generate Zod schema for interface '${interfaceName}': ${
@@ -109,8 +115,12 @@ export default function extractSbInterfaceToZod(
       });
     }
 
+    Tracer.log(LogLevel.DEBUG, `Raw zodSchema from ts-to-zod: "${zodSchema}"`, "extractSbInterfaceToZod");
+
     // Remove the first two lines (imports and empty line) and clean up
     const lines = zodSchema.split("\n");
+    Tracer.log(LogLevel.DEBUG, `Split into ${lines.length} lines`, "extractSbInterfaceToZod");
+    
     if (lines.length < 3) {
       throw new ValidationError(`Generated Zod schema for '${interfaceName}' has insufficient content`, {
         typeName: interfaceName,
@@ -119,6 +129,7 @@ export default function extractSbInterfaceToZod(
     }
 
     const cleanedSchema = lines.slice(2).join("\n").trim();
+    Tracer.log(LogLevel.DEBUG, `Cleaned schema: "${cleanedSchema}"`, "extractSbInterfaceToZod");
 
     if (!cleanedSchema) {
       Tracer.log(LogLevel.WARN, `Interface '${interfaceName}' results in an empty Zod definition`);

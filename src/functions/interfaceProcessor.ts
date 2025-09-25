@@ -2,6 +2,7 @@ import { Project } from "ts-morph";
 import { LogLevel, Tracer } from "../statics/Tracer";
 import { NativeSchemaRegistry } from "../statics/NativeSchemaRegistry";
 import extractSbInterfaceToZod from "./extractSbInterfaceToZod";
+import { ensureISbStoryDataSchema } from "./isbStoryDataProcessor";
 import { CLIOptions, FileOperationError, ValidationError } from "../validation";
 
 /**
@@ -12,6 +13,9 @@ export async function processStoryblokInterfaces(pathToSbInterfaceFile: string, 
 
   try {
     Tracer.log(LogLevel.DEBUG, `Processing Storyblok interfaces from: ${pathToSbInterfaceFile}`);
+
+    // First, ensure ISbStoryData schema is available
+    ensureISbStoryDataSchema(options);
 
     // Use ts-morph to analyze the file
     const storyblokTypesDefinitionFile = new Project().addSourceFileAtPath(pathToSbInterfaceFile);
