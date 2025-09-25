@@ -11,6 +11,7 @@ import {
   ValidationError,
 } from "../validation";
 import { convertSbToZodType } from "./typeConverter";
+import { createComponentStorySchema } from "../utils/isbStoryDataTemplates";
 
 /**
  * Converts a Storyblok component schema JSON file to a Zod schema definition.
@@ -105,58 +106,7 @@ export default async function convertComponentJsonToZod(
 
     // Generate ISbStoryData variant for this component if ISbStoryData schema exists
     if (NativeSchemaRegistry.has("ISbStoryData")) {
-      const isbVariantName = kebabToCamelCase(componentName) + "StorySchema";
-      // Instead of using .extend() on a lazy schema, manually create the object structure
-      // This avoids the issue where .extend() is called on lazy schemas which don't support it
-      const isbVariantContent = `export const ${isbVariantName}: z.ZodSchema<ISbStoryData & { content: z.infer<typeof ${componentNameCamel}> }> = z.lazy(() => z.object({
-  alternates: z.array(iSbAlternateObjectSchema),
-  breadcrumbs: z.array(iSbLinkURLObjectSchema).optional(),
-  content: ${componentNameCamel},
-  created_at: z.string(),
-  deleted_at: z.string().optional(),
-  default_full_slug: z.string().optional().nullable(),
-  default_root: z.string().optional(),
-  disable_fe_editor: z.boolean().optional(),
-  favourite_for_user_ids: z.array(z.number()).optional().nullable(),
-  first_published_at: z.string().optional().nullable(),
-  full_slug: z.string(),
-  group_id: z.string(),
-  id: z.number(),
-  imported_at: z.string().optional(),
-  is_folder: z.boolean().optional(),
-  is_startpage: z.boolean().optional(),
-  lang: z.string(),
-  last_author: z.object({
-    id: z.number(),
-    userid: z.string()
-  }).optional(),
-  last_author_id: z.number().optional(),
-  localized_paths: z.array(localizedPathSchema).optional().nullable(),
-  meta_data: z.any(),
-  name: z.string(),
-  parent: iSbStoryDataSchema.optional(),
-  parent_id: z.number().nullable(),
-  path: z.string().optional(),
-  pinned: z.union([z.literal("1"), z.boolean()]).optional(),
-  position: z.number(),
-  preview_token: previewTokenSchema.optional(),
-  published: z.boolean().optional(),
-  published_at: z.string().nullable(),
-  release_id: z.number().optional().nullable(),
-  scheduled_date: z.string().optional().nullable(),
-  slug: z.string(),
-  sort_by_date: z.string().nullable(),
-  tag_list: z.array(z.string()),
-  translated_slugs: z.array(z.object({
-    path: z.string(),
-    name: z.string().nullable(),
-    lang: z.string(),
-    published: z.boolean()
-  })).optional().nullable(),
-  unpublished_changes: z.boolean().optional(),
-  updated_at: z.string().optional(),
-  uuid: z.string()
-}));\n`;
+      const isbVariantContent = createComponentStorySchema(componentName, componentNameCamel);
 
       // Add the ISbStoryData variant as a separate entry
       ConvertedComponents.add(componentName + "_story", isbVariantContent);

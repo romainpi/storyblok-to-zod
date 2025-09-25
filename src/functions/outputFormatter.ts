@@ -1,5 +1,6 @@
 import { Project } from "ts-morph";
 import { LogLevel, Tracer } from "../statics/Tracer";
+import { fixPlaceholderImports } from "../utils/importPathUtils";
 
 /**
  * Analyzes the generated code content to extract imports and schemas
@@ -219,14 +220,10 @@ export function formatFinalOutput(
     // Deduplicate and sort imports
     const finalImports = deduplicateImports(extractedImports);
 
-    // Fix any remaining PLACEHOLDER_IMPORT_PATH imports
-    const fixedImports = finalImports.map(importStatement => {
-      if (importStatement.includes('PLACEHOLDER_IMPORT_PATH')) {
-        // Replace with the correct import for StoryblokRichtext (and any other types from storyblok.d)
-        return importStatement.replace('PLACEHOLDER_IMPORT_PATH', '~/types/storyblok.d');
-      }
-      return importStatement;
-    });
+    // Fix any remaining PLACEHOLDER_IMPORT_PATH imports using shared utility
+    const fixedImports = finalImports.map(importStatement => 
+      fixPlaceholderImports(importStatement)
+    ).flat();
 
     // Note: We don't re-export external types like ISbStoryData or StoryblokRichtext
     // Users should import them directly from their respective packages:

@@ -51,6 +51,7 @@ import { CLIOptions, ValidationError } from "../validation";
 import { writeFileSync, mkdirSync } from "fs";
 import { dirname, resolve } from "path";
 import { Project } from "ts-morph";
+import { fixPlaceholderImports } from "../utils/importPathUtils";
 
 /**
  * Creates a minimal source file with ISbStoryData and its dependencies, without generics.
@@ -215,37 +216,8 @@ export function extractAndConvertISbStoryData(options: CLIOptions): void {
         'export const $1:'
       );
 
-      // Fix imports - replace placeholder with proper imports from correct sources
-      fixedZodSchema = fixedZodSchema.replace(
-        /import\s+\{\s*type\s+([^}]+)\s*\}\s+from\s+['"]PLACEHOLDER_IMPORT_PATH['"];?/g,
-        (_match, types: string) => {
-          const typeList = types.split(',').map((t: string) => t.trim()).filter(Boolean);
-          const storyblokJsTypes = ['ISbStoryData', 'ISbMultipleStoriesData'];
-          const localTypes = ['StoryblokRichtext'];
-          
-          const imports: string[] = [];
-          
-          // Separate types by their source
-          const sbJsTypes = typeList.filter((t: string) => storyblokJsTypes.includes(t));
-          const localStoryblokTypes = typeList.filter((t: string) => localTypes.includes(t));
-          const unknownTypes = typeList.filter((t: string) => !storyblokJsTypes.includes(t) && !localTypes.includes(t));
-          
-          if (sbJsTypes.length > 0) {
-            imports.push(`import { type ${sbJsTypes.join(', type ')} } from 'storyblok-js-client';`);
-          }
-          
-          if (localStoryblokTypes.length > 0) {
-            imports.push(`import { type ${localStoryblokTypes.join(', type ')} } from '~/types/storyblok.d';`);
-          }
-          
-          // Keep unknown types with placeholder for now
-          if (unknownTypes.length > 0) {
-            imports.push(`import { type ${unknownTypes.join(', type ')} } from 'PLACEHOLDER_IMPORT_PATH';`);
-          }
-          
-          return imports.join('\n');
-        }
-      );
+      // Fix imports - replace placeholder with proper imports from correct sources using shared utility
+      fixedZodSchema = fixPlaceholderImports(fixedZodSchema);
 
       // Register the schema in the native schema registry
       NativeSchemaRegistry.set("ISbStoryData", fixedZodSchema);
@@ -282,39 +254,10 @@ export function extractAndConvertISbStoryData(options: CLIOptions): void {
         'export const $1:'
       );
 
-      // Fix imports - replace placeholder with proper imports from correct sources
-      fixedZodSchema = fixedZodSchema.replace(
-        /import\s+\{\s*type\s+([^}]+)\s*\}\s+from\s+['"]PLACEHOLDER_IMPORT_PATH['"];?/g,
-        (_match, types: string) => {
-          const typeList = types.split(',').map((t: string) => t.trim()).filter(Boolean);
-          const storyblokJsTypes = ['ISbStoryData', 'ISbMultipleStoriesData'];
-          const localTypes = ['StoryblokRichtext'];
-          
-          const imports: string[] = [];
-          
-          // Separate types by their source
-          const sbJsTypes = typeList.filter((t: string) => storyblokJsTypes.includes(t));
-          const localStoryblokTypes = typeList.filter((t: string) => localTypes.includes(t));
-          const unknownTypes = typeList.filter((t: string) => !storyblokJsTypes.includes(t) && !localTypes.includes(t));
-          
-          if (sbJsTypes.length > 0) {
-            imports.push(`import { type ${sbJsTypes.join(', type ')} } from 'storyblok-js-client';`);
-          }
-          
-          if (localStoryblokTypes.length > 0) {
-            imports.push(`import { type ${localStoryblokTypes.join(', type ')} } from '~/types/storyblok.d';`);
-          }
-          
-          // Keep unknown types with placeholder for now
-          if (unknownTypes.length > 0) {
-            imports.push(`import { type ${unknownTypes.join(', type ')} } from 'PLACEHOLDER_IMPORT_PATH';`);
-          }
-          
-          return imports.join('\n');
-        }
-      );
+      // Fix imports - replace placeholder with proper imports from correct sources using shared utility
+      fixedZodSchema = fixPlaceholderImports(fixedZodSchema);
 
-      // Simple fix for StoryblokRichtext import
+      // Simple fix for StoryblokRichtext import (legacy cleanup)
       fixedZodSchema = fixedZodSchema.replace(
         /import\s*\{\s*type\s+StoryblokRichtext\s*\}\s*from\s*['"]PLACEHOLDER_IMPORT_PATH['"];?/g,
         "import { type StoryblokRichtext } from '~/types/storyblok.d';"
