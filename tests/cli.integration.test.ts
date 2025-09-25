@@ -106,6 +106,30 @@ describe('CLI Integration Tests', () => {
     expect(outputContent).toContain('textBlockSchema');
   }, 30000); // 30 second timeout for integration test
 
+  it('should automatically include ISbStoryData schema in output', async () => {
+    const outputFile = path.join(testOutputDir, 'isb-story-data-test.zod.ts');
+    
+    const result = await runCLI([
+      '-s', 'testspace123',
+      '-f', testDataDir + '/.storyblok',
+      '-o', outputFile
+    ]);
+
+    expect(result.code).toBe(0);
+    
+    // Check that output file was created
+    const outputExists = await fs.access(outputFile)
+      .then(() => true)
+      .catch(() => false);
+    
+    expect(outputExists).toBe(true);
+
+    // Check that ISbStoryData-related schemas are included automatically
+    const outputContent = await fs.readFile(outputFile, 'utf-8');
+    // ISbStoryData should be automatically processed and included
+    expect(outputContent).toContain('StoryData');
+  }, 30000);
+
   it('should handle verbose flag', async () => {
     const outputFile = path.join(testOutputDir, 'verbose-output.zod.ts');
     
@@ -162,29 +186,6 @@ describe('CLI Integration Tests', () => {
     expect(result.stderr.includes('does not exist') || result.stdout.includes('does not exist')).toBe(true);
   }, 30000);
 
-  it('should export ISbStoryData schema when requested', async () => {
-    const outputFile = path.join(testOutputDir, 'isb-export.ts');
-    
-    const result = await runCLI([
-      '-s', 'testspace123',
-      '-f', testDataDir + '/.storyblok',
-      '--export-isb', outputFile
-    ]);
-
-    expect(result.code).toBe(0);
-    
-    // Check that output file was created
-    const outputExists = await fs.access(outputFile)
-      .then(() => true)
-      .catch(() => false);
-    
-    expect(outputExists).toBe(true);
-
-    // Check output content contains ISbStoryData schema
-    const outputContent = await fs.readFile(outputFile, 'utf-8');
-    expect(outputContent).toContain('ISbStoryData');
-  }, 30000);
-
   it('should handle missing required arguments', async () => {
     const result = await runCLI([]);
 
@@ -225,6 +226,29 @@ describe('CLI Integration Tests', () => {
     if (buttonIndex !== -1 && articlePageIndex !== -1) {
       expect(buttonIndex).toBeLessThan(articlePageIndex);
     }
+  }, 30000);
+
+  it('should handle no-extends-array flag', async () => {
+    const outputFile = path.join(testOutputDir, 'no-extends-array.zod.ts');
+    
+    const result = await runCLI([
+      '-s', 'testspace123',
+      '-f', testDataDir + '/.storyblok',
+      '-o', outputFile,
+      '--no-extends-array'
+    ]);
+
+    expect(result.code).toBe(0);
+    
+    // Check that output file was created
+    const outputExists = await fs.access(outputFile)
+      .then(() => true)
+      .catch(() => false);
+    
+    expect(outputExists).toBe(true);
+
+    // The main purpose of this test is to ensure the flag is properly processed
+    // The actual logic is tested in the unit tests
   }, 30000);
 
   it('should generate valid Zod schemas with astro/zod import and be parseable', async () => {
